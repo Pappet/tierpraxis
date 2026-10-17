@@ -1259,7 +1259,11 @@ $('go').addEventListener('click', async () => {
   neueRunde();
 });
 document.addEventListener('contextmenu', e => e.preventDefault());
-window.addEventListener('resize', () => { if(aktiv && $('raum').classList.contains('an')) Schicht.zeigen(aktiv); });
+/* Die Schicht-Leinwände liegen fest über dem Tier. Ändert sich dessen Platz (Werkzeugleiste bekommt
+   eine zweite Reihe, Drehen, Fenstergröße), müssen sie mitwandern, sonst sitzen sie versetzt. */
+const nachLayout = () => { if(aktiv && $('raum').classList.contains('an')) Schicht.zeigen(aktiv); };
+window.addEventListener('resize', nachLayout);
+if('ResizeObserver' in window) new ResizeObserver(nachLayout).observe($('tischwrap'));
 load(); $('sterne').textContent = S.sterne;
 if('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
