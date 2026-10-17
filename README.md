@@ -16,7 +16,9 @@ Eine HTML-Datei, offline-fähige PWA, keine Werbung, keine Käufe, keine Datenü
 4. **Schmücken**: Schleife, Krone, Blume, Hut, Stern, Brille aufs Tier ziehen (antippen nimmt es wieder ab), Krallen/Hufe lackieren. Grüner Haken = fertig.
 5. Das Tier landet als **Foto** an der Wand im Wartezimmer, es gibt einen Stern.
 
-Falsches Werkzeug: nichts passiert, nach einer Weile kommt der Hinweis „Probier mal …". Nach 13 s ohne Aktion wackelt das richtige Werkzeug.
+Falsches Werkzeug: nichts passiert, nach einer Weile kommt der Hinweis „Probier mal …". Nach 13 s ohne Aktion wackelt das richtige Werkzeug und es gibt eine Ansage; danach werden die Abstände länger und ab dem dritten Tipp wackelt es nur noch.
+
+Hat ein Tier mehrere Probleme, wird immer nur das aktuelle angesagt, das nächste erst, wenn das vorige erledigt ist.
 
 ## Stufen (je 3 behandelte Tiere)
 
@@ -46,7 +48,8 @@ Fehlt der Ordner, zeichnet das Spiel alles selbst – es läuft also auch ohne.
 
 ## Eltern
 
-- **Reset**: Sternanzeige 3 Sekunden gedrückt halten.
+- **Reset**: Sternanzeige 5 Sekunden gedrückt halten.
+- **Zurück-Geste** (Android) schließt die App nicht, sondern führt ins Wartezimmer.
 - Spielstand in `localStorage` unter `tierpraxis-spielstand`.
 - Nach jeder Änderung `VERSION` in `sw.js` hochzählen.
 

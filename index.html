@@ -120,6 +120,9 @@ body.bilder .patient .kissen{background:#FFB3CC;box-shadow:0 5px 0 #E88FAE}
 @keyframes wabbel{0%,100%{transform:scale(1)}50%{transform:scale(1.08,.94)}}
 @keyframes glitzern{0%,100%{transform:translateY(0);filter:brightness(1)}50%{transform:translateY(-3px);filter:brightness(1.25)}}
 @keyframes pochen{0%,100%{transform:rotate(0)}50%{transform:rotate(-7deg)}}
+.zielring{animation:zielring 1.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes zielring{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.18);opacity:.5}}
+.blase svg{width:72%;height:72%}
 .weg-anim{position:fixed;z-index:45;pointer-events:none;animation:puff .7s ease-out forwards}
 .weg-anim.plopp{animation:plopp .8s cubic-bezier(.3,1.4,.6,1) forwards}
 @keyframes puff{to{transform:scale(1.6);opacity:0}}
@@ -127,16 +130,14 @@ body.bilder .patient .kissen{background:#FFB3CC;box-shadow:0 5px 0 #E88FAE}
 #schichtA,#schichtB{position:fixed;z-index:5;pointer-events:none;display:none}
 #schichtB{mix-blend-mode:multiply}
 #hopvid{position:fixed;z-index:30;pointer-events:none;display:none;object-fit:contain}
-#hopser{position:fixed;z-index:30;pointer-events:none;display:none;background-repeat:no-repeat;background-size:3600% 100%}
-#hopser.an{display:block;animation:hopsen 3s steps(35) forwards}
-@keyframes hopsen{from{background-position:0 0}to{background-position:100% 0}}
 
 @media (orientation:portrait){
   #bank{flex-wrap:wrap;align-content:flex-end;padding-bottom:2vh}
   .patient{max-width:48vw;flex-basis:46%}
   .patient svg{max-height:28vh}
   #fotowand{height:14vh}
-  #tier{width:100%;height:auto;max-height:100%}
+  #tischwrap{align-items:flex-end;padding-bottom:4vh}
+  #tier{width:104%;max-width:104%;height:auto;max-height:100%}
   .werkzeug{width:96px;height:96px}
 }
 @media (prefers-reduced-motion:reduce){
@@ -169,7 +170,6 @@ body.bilder .patient .kissen{background:#FFB3CC;box-shadow:0 5px 0 #E88FAE}
   </div>
 </div>
 <div id="ghost"></div>
-<div id="hopser"></div>
 <canvas id="schichtA"></canvas><canvas id="schichtB"></canvas>
 <video id="hopvid" muted playsinline preload="auto"></video>
 <div id="konfetti"></div>
@@ -265,10 +265,12 @@ const Voice = (() => {
    Liegt der Ordner assets/ neben dem Spiel, werden die gemalten Bilder benutzt.
    Fehlt er, zeichnet das Spiel die Tiere selbst (SVG). */
 const ASSET_DIR = './assets/';
-let BILDER = false;
+let BILDER = false, gestartet = false;
+/* Der Modus wird beim Start festgelegt. Kommt das Bild erst danach, bleibt das Spiel bis zum
+   nächsten Start im Zeichenmodus, sonst passen die Punkte der Patienten nicht mehr zu den Bildern. */
 const bilderBereit = new Promise(res => {
   const im = new Image();
-  im.onload = () => { BILDER = true; document.body.classList.add('bilder'); res(true); };
+  im.onload = () => { if(gestartet) return res(false); BILDER = true; document.body.classList.add('bilder'); res(true); };
   im.onerror = () => res(false);
   im.src = ASSET_DIR + 'hund-normal.webp';
 });
@@ -295,7 +297,7 @@ const BILD_MASKE = {
   hase:'A8025F063T051F083R081B0B3P0B180C3P0C160E3N0E140F3N0G120F3N0H100G3M0J0Y0H3M0K0W0J3L0L0U0K3L0M0T0K3L0M0S0L3L0N0R0L3L0O0P0M3L0P0O0M3L0P0N0N3L0Q0M0N3L0Q0L0O3L0R0K0O3L0S0J0O3L0S0I0P3L0T0H0P3L0T0H0P3L0T0H0P3M0T0G0O3N0T0G0O3N0U0E0P3N0U0E0P3O0T0E0O3P0U0D0O3P0U0D0O3Q0T0D0N3R0U0C0N3S0T0C0N3S0T0B0N3U0S0A0O3U0S0601010P3W0S040S3W0S030S3Y0R020T3Z0Q010T411J421H441F461E471D481D491C491B4A1B4B1A4B194B1A4A1A491C481C471D471E461E451F451G441G441G441H431H431H431I411K401K401L3Y1N3W1O2S0A0U1P2M0J0P1Q2J0P0M1Q2H0U0I1R2F0Y0G1R2D130D1R2C160B1R2A1B081R1S09081G041Q1Q0D063B1O0G053A1O0I023C1N0K013B1N3W1O3V1O3V1O3U1Q3S1R3S1S3P1V3N1W3L1Z3I223I223I223I223I223J223I223I223J213J213J223I223I233H243G253F253E283C2A3A2C372I322I322J302K302K2Z2L2Z2M2X2N2X2O2W2O2W2O2W2O2W2N2X2M2Y2L2Z2K302K302K312J312I1F010E030L010J2I1D0K0L010J2I1D0K0L010K2I1B0M0K020J2I0M030M0M0K020J2I0M030N0L0K030I2I0M030O0K0L020J2H0M040P0J0K030K2G0M040Q0H0K030O2C0O020R0G0L020P2B0P020R0G1C2B0P020R0F1D2A0Q020Q0G1C2B0P030P0G1D2A0P040O0G1D2A0P050N0H1C2B0O060M0H0O010N2C0N070K0I0O010M2D0M090H0L0N020K2F0K0D0601030Q0L050H2I0G1G0K080A4K0FCS',
   einhorn:'LB035G045F045G045F055E065D074V060C064T0D07074Q0I040803034J0K030802054G0W02074603050X01084506031743080118431H421I421I421I421I411J411J411J411J411J411I411J411I411K401M3X1O3W1P3U1Q3T1S3S1S3R1U3Q1U3Q1U3P1V3P1U3P1V3P1U3Q1U3Q1T3R1T3Q1T3R1T3R1T3R1U3Q1U3Q1V3Q1U3Q1U3Q1U3Q1U3P1V3P1V1T0C1K1V1R0H1H1V1P0K1F1W1N0O1C1W1N0Q1A1X1M0S15201M0U14201L0W151X1L0Y0D070K1W1L0Z080G0G1W1K11050L0C1W1L11030S071V1L3Y1M3X1M3W1O3U1Q3P1U3L1Z3L1Z3M1Y3M1Y3M1Y3N1X3O1W3P1V3M02011V3N1X3N1X3N1X3N1X3N1X3N1W3O1W3O1W3O1V3O1V3O1R3T1S3R1T3Q1V3P1Z3K1Z3L1Y3M1X3M1X3N1W3O1W3N1W3O1W14012J1V15012J1V15012J1V14022J1V14012K1V3P1V25031H1V25071D1V250D08020X1V240P0W1W230P0X1V220Q0X1W0W01130R0X1X0U02130S0W1Y0S030J010J0S0W1Z0R030I020I0T0X1Z0P040I020I0T0X200O030I040H0U0W1V01040O030I040H0U0W1V02030O030H060H0T0G010G1U0T030H060H0T0G010G1U0U020G080G0T0G010G1V1B080H0S0G020G1U0T020G080H0T0F020G1V0Q040G090H0S0F020G1X0N050G090H0S0G020G1X0M050G0A0H0R0G020G1X0M050G0A0H0R0G020H1Y0J050H0A0I0Q0G020H1Z0H060H0B0H0Q0H020H1Z0F070I0A0I0P0H020I200C080I0A0J0O0H020I22080A0J0A0I0O0I020I2J0J0A0J0N0I020J2I0K090K0M0J010J2I0K0A0J0M0J020J2I0J0A0K0M0J010J2I0K0A0J0M0J020J2H0K0A0K0L0K010J2H0L0A0J0L0K010J2I0K0A0J0M0J020I2I0K0B0I0M0J020J2H0K0B0I0M0K010J2I0J0C0H0M0K020H2K0I0E0C0Q0J040D2N0F1J0H3A051Q0DNT'
 };
-/* Hüpf-Animation: Streifen mit 36 Bildern, Tier darin auf 80 % verkleinert bei (112,363) von 1120 */
+/* Hüpf-Video: Tier darin auf 80 % verkleinert bei (112,363) von 1120 */
 const HOPS = {k: 400/(1120*0.8)};
 function punkte(art){
   if(BILDER) return BILD_GEO[art];
@@ -528,6 +530,7 @@ function tierBild(p, opt){
   });
   return s;
 }
+const zielRing = (x, y) => `<circle class="zielring" cx="${x}" cy="${y}" r="30" fill="none" stroke="#FFD84D" stroke-width="6" stroke-dasharray="12 9" stroke-linecap="round"/>`;
 function zielBild(z){
   const {x, y} = z, im = (n, w, h, dx=0, dy=0, cls='') => `<image class="${cls}" href="${O(n)}" x="${x-w/2+dx}" y="${y-h/2+dy}" width="${w}" height="${h}"/>`;
   switch(z.art){
@@ -538,7 +541,8 @@ function zielBild(z){
     case 'wunde':   return im('wunde', 40, 40, 0, -6);
     case 'salbe':   return im('salbe', 42, 42, 0, -6, 'glitzern');
     case 'knoten':  return im('knoten', 60, 60, 0, 0, 'wabbel');
-    case 'fieber2': return `<text x="${x+34}" y="${y-60}" font-size="34" text-anchor="middle">🌡️</text>`;
+    case 'fieber':  case 'leckerli': return zielRing(x, y);
+    case 'fieber2': return zielRing(x, y) + `<text x="${x+34}" y="${y-60}" font-size="34" text-anchor="middle">🌡️</text>`;
   }
   return '';
 }
@@ -561,29 +565,28 @@ function wegEffekt(z){
   document.body.appendChild(d); setTimeout(() => d.remove(), 900);
 }
 /* Freudenhüpfer: Sprite-Streifen über dem Tier abspielen, solange das Standbild versteckt ist */
+let hoppt = false;
 function hopsen(){
   if(!BILDER || !aktiv) return Promise.resolve();
   return new Promise(res => {
-    const svg = $('tier'), h = $('hopser'), k = HOPS.k;
+    const svg = $('tier'), k = HOPS.k, v = $('hopvid');
+    if(!v.canPlayType('video/webm; codecs="vp9"')){ res(); return; }
     const a = svgZuBild(-112*k, -20-363*k), b = svgZuBild(-112*k + 1120*k, -20-363*k + 1120*k);
-    Object.assign(h.style, {left:a.x+'px', top:a.y+'px', width:(b.x-a.x)+'px', height:(b.y-a.y)+'px',
-      backgroundImage:`url(${ASSET_DIR}${aktiv.art}-hops.webp)`});
-    const v = $('hopvid');
-    const webm = v.canPlayType('video/webm; codecs="vp9"');
-    if(!webm){ res(); return; }
-    Object.assign(v.style, {left:h.style.left, top:h.style.top, width:h.style.width, height:h.style.height});
+    Object.assign(v.style, {left:a.x+'px', top:a.y+'px', width:(b.x-a.x)+'px', height:(b.y-a.y)+'px'});
     let fertig = false;
-    const ende = () => { if(fertig) return; fertig = true; v.style.display = 'none'; const k2 = svg.querySelector('#tierkoerper'); if(k2) k2.style.visibility = ''; res(); };
+    const ende = () => { if(fertig) return; fertig = true; hoppt = false; v.pause(); v.style.display = 'none'; const k2 = svg.querySelector('#tierkoerper'); if(k2) k2.style.visibility = ''; res(); };
     v.onended = ende; v.onerror = ende;
     v.src = `${ASSET_DIR}${aktiv.art}-hops.webm`;
     v.currentTime = 0;
     v.play().then(() => {
-      v.style.display = 'block';
+      hoppt = true; v.style.display = 'block';
       const koerper = svg.querySelector('#tierkoerper'); if(koerper) koerper.style.visibility = 'hidden';
       setTimeout(ende, 4000);
     }).catch(ende);
+    hopEnde = ende;
   });
 }
+let hopEnde = () => {};
 
 /* ================= Schichten: Schmutz und Zotteln über dem ganzen Tier =================
    Jede Schicht ist ein eigenes Zahlenfeld (200×160 = viewBox/2, Werte 0..1). Reiben verändert
@@ -649,11 +652,13 @@ const Schicht = (() => {
   }
   function messen(S){ for(const k in S.m) S.stand[k] = summe(S.m[k]); S.gemessen = performance.now(); }
   const anteil = (S, k) => k === 'schlamm' ? S.stand.schlamm/S.start : k === 'zottel' ? S.stand.zottel/S.startZ : (S.stand[k]||0)/(S.flaeche||1);
+  /* Ab diesem Rest gilt eine Schicht als erledigt (Anteil der Ausgangsmenge bzw. der Fläche) */
+  const REST = {schlamm:.2, schaum:.1, nass:.1};
   function tool(p, art){
     const S = p.schicht; if(art === 'zottel') return 'buerste';
     if(!S) return 'schwamm';
-    if(anteil(S,'schlamm') > .12) return 'schwamm';
-    if(anteil(S,'schaum') > .06) return 'dusche';
+    if(anteil(S,'schlamm') > REST.schlamm) return 'schwamm';
+    if(anteil(S,'schaum') > REST.schaum) return 'dusche';
     return 'foehn';
   }
   function reiben(p, t, x, y, bew, dt){
@@ -672,7 +677,7 @@ const Schicht = (() => {
     } else if(t === 'foehn' && m.nass){
       pinsel(m.nass, S.sil, mx, my, R+4, -.15*mehr); tat = true;
     } else if(t === 'buerste' && m.zottel){
-      if(bew > .5){ pinsel(m.zottel, S.sil, mx, my, R-2, -.12*Math.min(1, bew/6)); tat = true; }
+      if(bew > .5){ pinsel(m.zottel, S.sil, mx, my, R+6, -.18*Math.min(1, bew/6)); tat = true; }
     }
     if(!tat) return false;
     malenBald(p);
@@ -683,20 +688,20 @@ const Schicht = (() => {
     const S = p.schicht;
     const z = p.ziele.find(z => z.art === 'schmutz');
     if(z){
-      const sauber = anteil(S,'schlamm') < .12, abgespuelt = anteil(S,'schaum') < .06;
+      const sauber = anteil(S,'schlamm') <= REST.schlamm, abgespuelt = anteil(S,'schaum') <= REST.schaum;
       if(sauber && !p.gesagt.schaum && !abgespuelt){ p.gesagt.schaum = 1; Voice.say('Super! Jetzt abduschen.'); }
-      if(sauber && abgespuelt && !p.gesagt.tropfen && anteil(S,'nass') > .06){ p.gesagt.tropfen = 1; Voice.say('Jetzt mit dem Föhn trocken föhnen.'); }
-      if(sauber && abgespuelt && anteil(S,'nass') < .06){ ['schlamm','schaum','nass'].forEach(k => S.m[k].fill(0)); fertig(p, z); return; }
+      if(sauber && abgespuelt && !p.gesagt.tropfen && anteil(S,'nass') > REST.nass){ p.gesagt.tropfen = 1; Voice.say('Jetzt mit dem Föhn trocken föhnen.'); }
+      if(sauber && abgespuelt && anteil(S,'nass') <= REST.nass){ ['schlamm','schaum','nass'].forEach(k => S.m[k].fill(0)); fertig(p, z); return; }
       markiere();
     }
     const zz = p.ziele.find(z => z.art === 'zottel');
-    if(zz && anteil(S,'zottel') < .12){ S.m.zottel.fill(0); fertig(p, zz); }
+    if(zz && anteil(S,'zottel') < .25){ S.m.zottel.fill(0); fertig(p, zz); }
   }
   function fertig(p, z){
     malen(p); SFX.ding(); herzen();
     p.ziele.splice(p.ziele.indexOf(z), 1);
     zeichne(); markiere();
-    if(p.ziele.length === 0 && p.phase === 'behandlung') gesund();
+    if(p.phase === 'behandlung') p.ziele.length === 0 ? gesund() : naechstesProblem(p);
   }
   function lage(){ const a = svgZuBild(0, -20), b = svgZuBild(400, 300); return {x:a.x, y:a.y, w:b.x-a.x, h:b.y-a.y}; }
   function zeigen(p){
@@ -768,9 +773,8 @@ function zielSvg(z, T){
     case 'salbe': return `<ellipse cx="${x}" cy="${y-4}" rx="13" ry="9" fill="#fff" opacity=".9"/><ellipse cx="${x-3}" cy="${y-6}" rx="4" ry="2" fill="#E6F4FF"/>`;
     case 'knoten': return `<path d="M${x-22},${y} c0,-20 20,-20 20,0 c0,20 -20,16 -12,-4 c8,-20 28,-12 24,6 c-4,18 -24,10 -14,-8 c8,-14 26,-4 18,10" stroke="${darker(T.fell,.62)}" stroke-width="5" fill="none" stroke-linecap="round"/>`;
     case 'kralle': return ''; // Krallen sind im Fuß gezeichnet
-    case 'fieber': return '';
-    case 'fieber2': return `<text x="${x+34}" y="${y-60}" font-size="34" text-anchor="middle">🌡️</text>`;
-    case 'leckerli': return '';
+    case 'fieber': case 'leckerli': return zielRing(x, y);
+    case 'fieber2': return zielRing(x, y) + `<text x="${x+34}" y="${y-60}" font-size="34" text-anchor="middle">🌡️</text>`;
   }
   return '';
 }
@@ -784,7 +788,7 @@ const KETTE = {
   dorn:    {tool:'zange',   hp:110, rub:1, hold:10,  next:'wunde', r:26},
   wunde:   {tool:'salbe',   hp:90,  rub:1, hold:15,  next:'salbe', r:24},
   salbe:   {tool:'pflaster',hp:1,   rub:1, hold:999, next:null, r:26, bleibt:'pflaster'},
-  knoten:  {tool:'buerste', hp:260, rub:1, hold:0,   next:null, r:32},
+  knoten:  {tool:'buerste', hp:180, rub:1, hold:0,   next:null, r:32},
   kralle:  {tool:'schere',  hp:1,   rub:1, hold:999, next:null, r:24},
   fieber:  {tool:'thermo',  hp:75,  rub:.5,hold:30,  next:'fieber2', r:34},
   fieber2: {tool:'medizin', hp:1,   rub:1, hold:999, next:null, r:34},
@@ -822,7 +826,7 @@ function iconHtml(t){
 const PROBLEME = {
   schlamm: {blase:'🛁'},
   dorn:    {blase:'🩹'},
-  knoten:  {blase:'🪮'},
+  knoten:  {blase:TOOL_SVG.buerste},
   kralle:  {blase:'✂️'},
   fieber:  {blase:'🤒'}
 };
@@ -840,6 +844,7 @@ function neuerPatient(art){
   const g = geo(art), P = punkte(art), F = P.feet;
   const add = (a, x, y, extra={}) => { const k = KETTE[a]; p.ziele.push({art:a, x, y, hp:k.hp, max:k.hp, r:k.r, ...extra}); };
   for(const pr of probs){
+    const vorher = p.ziele.length;
     if(pr === 'schlamm' && BILDER){
       p.ziele.push({art:'schmutz', x:0, y:0, hp:1, max:1, r:0});
     } else if(pr === 'knoten' && BILDER){
@@ -855,6 +860,7 @@ function neuerPatient(art){
     } else if(pr === 'fieber'){
       add('fieber', P.mund[0], P.mund[1]);
     }
+    p.ziele.slice(vorher).forEach(z => { z.problem = pr; });
   }
   // Schlamm und Knoten dürfen nicht übereinanderliegen
   if(probs.includes('schlamm') && probs.includes('knoten')){
@@ -863,18 +869,41 @@ function neuerPatient(art){
   return p;
 }
 
-function ansage(p){
-  const T = TIERE[p.art], teile = [];
-  for(const pr of p.probleme){
-    if(pr === 'schlamm') teile.push(`${T.Der} hat sich im Schlamm gewälzt! Zuerst mit dem Schwamm einseifen.`);
-    if(pr === 'dorn') teile.push(p.ziele.find(z=>z.nagel) || (p.art==='pony'||p.art==='einhorn')
-      ? `Oh je, ${T.Der.toLowerCase()} hat einen Nagel im Huf. Zieh ihn mit der Zange raus.`
-      : `Aua! ${T.Der} hat einen Dorn in der Pfote. Zieh ihn mit der Zange raus.`);
-    if(pr === 'knoten') teile.push(`Das Fell ist ganz verknotet. Bürste es schön glatt!`);
-    if(pr === 'kralle') teile.push(`Die Krallen sind viel zu lang. Schneide sie mit der Schere.`);
-    if(pr === 'fieber') teile.push(`${T.Der} ist krank. Miss zuerst Fieber mit dem Thermometer. Halt es an den Mund.`);
+/* Probleme, an denen noch etwas zu tun ist, in der Reihenfolge der Ziele */
+const offen = p => [...new Set((p.ziele||[]).map(z => z.problem).filter(Boolean))];
+function zielTool(p, z){ return z.art === 'schmutz' || z.art === 'zottel' ? Schicht.tool(p, z.art) : KETTE[z.art].tool; }
+function problemSatz(p, pr){
+  const T = TIERE[p.art], z = p.ziele.find(z => z.problem === pr), t = z ? zielTool(p, z) : null;
+  const huf = p.art === 'pony' || p.art === 'einhorn';
+  if(pr === 'schlamm'){
+    if(t === 'dusche') return `${T.Der} ist eingeseift. Jetzt abduschen.`;
+    if(t === 'foehn') return 'Jetzt mit dem Föhn trocken föhnen.';
+    return `${T.Der} hat sich im Schlamm gewälzt! Zuerst mit dem Schwamm einseifen.`;
   }
-  return teile.map(t => ({text:t, pause:350}));
+  if(pr === 'dorn'){
+    if(t === 'salbe') return 'Jetzt kommt Salbe auf die Wunde.';
+    if(t === 'pflaster') return 'Jetzt kommt ein Pflaster drauf.';
+    return huf ? `Oh je, ${T.Der} hat einen Nagel im Huf. Zieh ihn mit der Zange raus.`
+               : `Aua! ${T.Der} hat einen Dorn in der Pfote. Zieh ihn mit der Zange raus.`;
+  }
+  if(pr === 'knoten') return 'Das Fell ist ganz verknotet. Bürste es schön glatt!';
+  if(pr === 'kralle') return 'Die Krallen sind viel zu lang. Schneide sie mit der Schere.';
+  if(pr === 'fieber') return t === 'medizin' ? `${T.Der} hat Fieber. Jetzt gibt es Medizin.`
+                                             : `${T.Der} ist krank. Miss zuerst Fieber mit dem Thermometer. Halt es an den Mund.`;
+  return '';
+}
+function ansage(p){
+  const pr = offen(p)[0]; if(!pr) return [];
+  p.gesagt['a_' + pr] = 1;
+  const teile = [];
+  if(p.probleme.length > 1 && offen(p).length === p.probleme.length) teile.push({text:`${TIERE[p.art].Der} braucht heute ${p.probleme.length === 2 ? 'zwei' : 'drei'} Sachen.`, pause:250});
+  teile.push({text:problemSatz(p, pr), pause:350});
+  return teile;
+}
+/* Ist ein Problem fertig, wird das nächste angesagt (jedes nur einmal) */
+function naechstesProblem(p){
+  const pr = offen(p)[0];
+  if(pr && !p.gesagt['a_' + pr]){ p.gesagt['a_' + pr] = 1; Voice.say([{text:'Prima!', pause:450}, {text:problemSatz(p, pr), pause:350}]); }
 }
 const STUFEN_SATZ = {
   schaum: 'Super! Jetzt abduschen.',
@@ -907,7 +936,7 @@ function zeigeWarte(){
     if(p.phase === 'fertig') return;
     const d = document.createElement('div'); d.className = 'patient dran'; d.dataset.i = i;
     d.style.animationDelay = (i*.3) + 's';
-    const blase = p.phase === 'behandlung' ? PROBLEME[p.probleme[0]].blase + (p.probleme.length > 1 ? '' : '') : '🎀';
+    const blase = p.phase === 'behandlung' ? PROBLEME[offen(p)[0] || p.probleme[0]].blase : '🎀';
     d.innerHTML = `<div class="blase">${blase}</div><svg viewBox="0 -20 400 320">${tierMalen(p, {mini:true})}</svg><div class="kissen"></div>`;
     d.addEventListener('click', () => { ac(); SFX.pop(); behandeln(p); });
     bank.appendChild(d);
@@ -926,12 +955,12 @@ function fotowand(neu){
 }
 
 /* ================= Behandlung ================= */
-function szene(id){ document.querySelectorAll('.szene').forEach(s => s.classList.toggle('an', s.id === id)); if(id !== 'raum') Schicht.verstecken(); }
+function szene(id){ document.querySelectorAll('.szene').forEach(s => s.classList.toggle('an', s.id === id)); if(id !== 'raum'){ Schicht.verstecken(); hopEnde(); } }
 
 function schichtErsatz(p){
   const P = punkte(p.art);
-  p.ziele = p.ziele.flatMap(z => z.art === 'schmutz' ? P.body.map(([x,y]) => ({art:'schlamm', x, y, hp:KETTE.schlamm.hp, max:KETTE.schlamm.hp, r:KETTE.schlamm.r}))
-                            : z.art === 'zottel' ? P.body.slice(0,3).map(([x,y]) => ({art:'knoten', x, y:y-14, hp:KETTE.knoten.hp, max:KETTE.knoten.hp, r:KETTE.knoten.r}))
+  p.ziele = p.ziele.flatMap(z => z.art === 'schmutz' ? P.body.map(([x,y]) => ({art:'schlamm', problem:z.problem, x, y, hp:KETTE.schlamm.hp, max:KETTE.schlamm.hp, r:KETTE.schlamm.r}))
+                            : z.art === 'zottel' ? P.body.slice(0,3).map(([x,y]) => ({art:'knoten', problem:z.problem, x, y:y-14, hp:KETTE.knoten.hp, max:KETTE.knoten.hp, r:KETTE.knoten.r}))
                             : [z]);
 }
 async function behandeln(p){
@@ -945,7 +974,10 @@ async function behandeln(p){
   else Voice.replace('Jetzt darfst du schmücken. Wenn du fertig bist, drück den grünen Haken.');
   idleReset();
 }
-function zeichne(){ $('tier').innerHTML = tierMalen(aktiv); Schicht.zeigen(aktiv); }
+function zeichne(){
+  $('tier').innerHTML = tierMalen(aktiv); Schicht.zeigen(aktiv);
+  if(hoppt){ const k = $('tier').querySelector('#tierkoerper'); if(k) k.style.visibility = 'hidden'; }
+}
 
 function naechstesTool(){
   const z = aktiv.ziele[0]; if(!z) return null;
@@ -997,7 +1029,7 @@ function svgZuBild(x, y){
   return pt.matrixTransform(svg.getScreenCTM());
 }
 $('ablage').addEventListener('pointerdown', e => {
-  const b = e.target.closest('.werkzeug'); if(!b || !aktiv) return;
+  const b = e.target.closest('.werkzeug'); if(!b || !aktiv || aktiv.phase === 'fertig') return;
   ac(); e.preventDefault(); idleReset();
   const t = b.dataset.t;
   if(t === 'fertig'){ fertig(); return; }
@@ -1114,7 +1146,7 @@ function zielFertig(i){
   }
   if(z.art === 'leckerli'){ leckerliGegessen(); return; }
   zeichne(); markiere();
-  if(aktiv.ziele.length === 0 && aktiv.phase === 'behandlung') gesund();
+  if(aktiv.phase === 'behandlung') aktiv.ziele.length === 0 ? gesund() : naechstesProblem(aktiv);
 }
 function gesund(){
   const T = TIERE[aktiv.art];
@@ -1133,21 +1165,21 @@ function leckerliGegessen(){
   SFX.mampf(); aktiv.phase = 'schmuck'; zeichne();
   $('tier').classList.add('mampf'); setTimeout(() => $('tier').classList.remove('mampf'), 1600);
   herzen();
-  Voice.say(['Mmmh, lecker!', {text:'Jetzt darfst du schmücken und die Krallen lackieren. Wenn du fertig bist, drück den grünen Haken.', pause:0}]);
-  if(aktiv.art === 'pony' || aktiv.art === 'einhorn') { /* Hufe lackieren geht auch */ }
+  const fuss = aktiv.art === 'pony' || aktiv.art === 'einhorn' ? 'die Hufe' : 'die Krallen';
+  Voice.say(['Mmmh, lecker!', {text:`Jetzt darfst du schmücken und ${fuss} lackieren. Wenn du fertig bist, drück den grünen Haken.`, pause:0}]);
   ablage();
 }
 function fertig(){
-  if(!aktiv) return;
+  if(!aktiv || aktiv.phase !== 'schmuck') return;
   const p = aktiv, T = TIERE[p.art];
   p.phase = 'fertig';
   S.sterne++; S.behandelt++;
-  S.fotos.push({art:p.art, deko:p.deko, lack:p.lack, pflaster:p.pflaster});
+  S.fotos.push(JSON.parse(JSON.stringify({art:p.art, deko:p.deko, lack:p.lack, pflaster:p.pflaster})));
   if(S.fotos.length > 30) S.fotos = S.fotos.slice(-30);
   save(); $('sterne').textContent = S.sterne;
   SFX.fanfare(); herzen();
   $('tier').classList.remove('freude'); void $('tier').offsetWidth; $('tier').classList.add('freude');
-  Voice.replace([`Tschüss, ${T.name}! Danke für deine Hilfe.`]);
+  Voice.replace([{pause:250}, {text:`Tschüss, ${T.name}!`, pause:200}, `${T.Der} sagt danke!`]);
   rundeFertig++;
   setTimeout(() => {
     zeigeWarte(); fotowand(true);
@@ -1174,34 +1206,44 @@ $('tier').addEventListener('pointerdown', e => {
 });
 
 /* ---- Tipps nach Wartezeit ---- */
-let idleT = null;
-function idleReset(){
-  clearTimeout(idleT);
-  idleT = setTimeout(tipp, 13000);
-}
+/* Nach 13 s ohne Aktion ein Tipp. Kommt dann weiter nichts, werden die Abstände länger
+   und ab dem dritten Tipp wackelt nur noch das Werkzeug, ohne Ansage. */
+let idleT = null, tippN = 0;
+function tippPlanen(){ clearTimeout(idleT); idleT = setTimeout(tipp, 13000 * 2 ** Math.min(tippN, 3)); }
+function idleReset(){ tippN = 0; tippPlanen(); }
 function wackeln(t){
   const b = document.querySelector(`.werkzeug[data-t="${t}"]`); if(!b) return;
   b.classList.remove('wackel'); void b.offsetWidth; b.classList.add('wackel');
 }
-const TIPP = {zange:'zieh damit', schere:'tipp damit die Krallen an', pflaster:'kleb es drauf', thermo:'halt es an den Mund', medizin:'gib sie in den Mund'};
+const TIPP = {schwamm:'reib damit über das Fell', dusche:'halt sie über das Tier', foehn:'föhn damit das Fell trocken',
+  buerste:'bürste damit das Fell', zange:'zieh damit', schere:'halt sie an die Krallen', salbe:'reib sie auf die Wunde',
+  pflaster:'kleb es drauf', thermo:'halt es an den Mund', medizin:'gib sie in den Mund'};
 function tipp(){
   if(drag) return idleReset();
-  if(!aktiv){ Voice.say('Tipp ein Tier an!'); }
+  tippN++;
+  const reden = tippN <= 2;
+  if(!aktiv){ if(reden && patienten.some(p => p.phase !== 'fertig')) Voice.say('Tipp ein Tier an!'); }
   else if(aktiv.phase === 'behandlung'){
     const n = naechstesTool();
-    if(n){ wackeln(n); Voice.say(`Nimm ${TOOLS[n].den} und ${TIPP[n] || 'reib damit über das Tier'}.`); }
+    if(n){ wackeln(n); if(reden) Voice.say(`Nimm ${TOOLS[n].den} und ${TIPP[n]}.`); }
   }
-  else if(aktiv.phase === 'leckerli'){ wackeln('leckerli'); Voice.say('Zieh das Leckerli zum Mund.'); }
-  else { wackeln('fertig'); }
-  idleReset();
+  else if(aktiv.phase === 'leckerli'){ wackeln('leckerli'); if(reden) Voice.say('Zieh das Leckerli zum Mund.'); }
+  else if(aktiv.phase === 'schmuck'){ wackeln('fertig'); }
+  tippPlanen();
 }
 
 /* ================= Rahmen ================= */
 $('home').addEventListener('click', () => { ac(); SFX.klick(); Voice.flush(); zeigeWarte(); });
+/* Zurück-Geste (Android): nicht die App schließen, sondern ins Wartezimmer */
+window.addEventListener('popstate', () => {
+  if(!gestartet) return;
+  history.pushState({tierpraxis:1}, '');
+  if(aktiv && aktiv.phase !== 'fertig' && $('raum').classList.contains('an')){ SFX.klick(); Voice.flush(); zeigeWarte(); }
+});
 let resetT;
 $('sterneChip').addEventListener('pointerdown', () => { resetT = setTimeout(() => {
   if(confirm('Spielstand wirklich zurücksetzen?')){ localStorage.removeItem(SAVE_KEY); location.reload(); }
-}, 3000); });
+}, 5000); });
 ['pointerup','pointerleave','pointercancel'].forEach(ev => $('sterneChip').addEventListener(ev, () => clearTimeout(resetT)));
 $('fs').addEventListener('click', () => {
   if(!document.fullscreenElement) document.documentElement.requestFullscreen?.().catch(()=>{});
@@ -1209,8 +1251,10 @@ $('fs').addEventListener('click', () => {
 });
 $('go').addEventListener('click', async () => {
   ac(); document.documentElement.requestFullscreen?.().catch(()=>{});
-  await Promise.race([bilderBereit, new Promise(r => setTimeout(r, 1500))]);
+  await Promise.race([bilderBereit, new Promise(r => setTimeout(r, 3000))]);
+  gestartet = true;
   $('start').remove();
+  history.pushState({tierpraxis:1}, '');
   Voice.say([{text:'Willkommen in der Tierpraxis!', pause:300}]);
   neueRunde();
 });
