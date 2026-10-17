@@ -1,6 +1,7 @@
 {
   "name": "Tierpraxis",
   "short_name": "Tierpraxis",
+  "id": "./",
   "lang": "de",
   "start_url": "./",
   "scope": "./",
