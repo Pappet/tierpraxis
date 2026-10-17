@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#4FA89A">
+<title>Tierpraxis</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/favicon-32.png">
+<link rel="apple-touch-icon" href="./icons/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#2F3A45;--mint:#4FA89A;--mint2:#BFE6DC;--wand:#FFF4E4;--rosa:#FF8FB1}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--mint)}
+body{font-family:'Fredoka',ui-rounded,system-ui,sans-serif;color:var(--ink);
+  user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;touch-action:none}
+#app{height:100dvh;display:flex;flex-direction:column}
+header{height:64px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 14px;
+  background:var(--mint);z-index:6}
+.sign{font-weight:700;font-size:26px;color:#fff;display:flex;align-items:center;gap:10px;text-shadow:0 2px 0 rgba(0,0,0,.15)}
+.stats{display:flex;gap:10px;align-items:center}
+.chip{background:#fff;border-radius:999px;padding:6px 16px;font-weight:700;font-size:22px;border:none;
+  box-shadow:0 3px 0 rgba(0,0,0,.15);font-family:inherit;color:inherit;min-height:48px;min-width:48px}
+#home{font-size:26px;padding:4px 14px}
+#home.aus{visibility:hidden}
+
+/* ---------- Szenen ---------- */
+#buehne{position:relative;flex:1;overflow:hidden;touch-action:none}
+.szene{position:absolute;inset:0;display:none}
+.szene.an{display:flex}
+
+/* Wartezimmer */
+#warte{flex-direction:column;background:
+  linear-gradient(#FFF4E4 0 72%,#E9C99B 72% 74%,#D8B07A 74%);}
+#fenster{position:absolute;left:5%;top:6%;width:min(22vw,220px);aspect-ratio:1.2;border:10px solid #fff;border-radius:14px;
+  background:linear-gradient(#9ED8F5,#D8F1FF);box-shadow:0 4px 0 rgba(0,0,0,.08);overflow:hidden;font-size:min(6vw,56px)}
+#fenster span{position:absolute;left:12%;top:10%}
+#fenster .wolke{left:auto;right:6%;top:38%;animation:wolke 9s ease-in-out infinite alternate}
+@keyframes wolke{to{transform:translateX(-60%)}}
+#bild{position:absolute;right:7%;top:8%;width:min(14vw,140px);aspect-ratio:.85;background:#FFD6E4;border:8px solid #C99A6B;
+  border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:min(7vw,64px)}
+#pflanze{position:absolute;left:1%;bottom:17vh;font-size:min(10vw,96px)}
+#bank{flex:1;position:relative;display:flex;align-items:flex-end;justify-content:space-evenly;padding:0 2vw 3vh;gap:1vw}
+.patient{position:relative;flex:1;max-width:32vw;display:flex;flex-direction:column;align-items:center;
+  cursor:pointer;transition:transform .2s}
+.patient svg{width:100%;height:auto;max-height:42vh;pointer-events:none}
+.patient .kissen{width:90%;height:26px;border-radius:50%;background:#FF9EC0;margin-top:-18px;box-shadow:0 5px 0 #E87BA0}
+.patient.dran{animation:hopp 1.6s ease-in-out infinite}
+.blase{position:absolute;top:-4%;right:4%;background:#fff;border-radius:50%;width:clamp(64px,9vw,96px);
+  aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:clamp(36px,5vw,54px);
+  box-shadow:0 4px 0 rgba(0,0,0,.12);pointer-events:none}
+.blase:after{content:"";position:absolute;bottom:-8px;left:22%;border:10px solid transparent;border-top:14px solid #fff;border-bottom:0}
+#fotowand{height:18vh;min-height:90px;flex:none;display:flex;align-items:center;gap:12px;padding:0 16px;overflow:hidden}
+.foto{height:88%;aspect-ratio:1.15;background:#fff;padding:6px 6px 14px;border-radius:6px;
+  box-shadow:0 4px 8px rgba(0,0,0,.2);transform:rotate(var(--r));flex:none}
+.foto svg{width:100%;height:100%;background:#DFF3EE;border-radius:3px}
+.foto.neu{animation:reinflattern .8s ease-out}
+
+/* Behandlungsraum */
+#raum{flex-direction:column;background:
+  radial-gradient(circle at 50% 38%,#E8F7F3 0 30%,transparent 60%),
+  linear-gradient(#D6EFEA 0 70%,#B9DDD5 70%)}
+#tischwrap{flex:1;position:relative;display:flex;align-items:center;justify-content:center;min-height:0}
+#tier{height:100%;max-height:100%;width:auto;max-width:96%;aspect-ratio:400/332;touch-action:none;overflow:visible}
+#tisch{position:absolute;left:50%;transform:translateX(-50%);bottom:3%;width:min(70%,700px);height:5%;
+  background:#fff;border-radius:18px;box-shadow:0 8px 0 #9CC9BF;pointer-events:none}
+#ablage{flex:none;display:flex;flex-wrap:wrap;justify-content:center;align-content:center;gap:10px;
+  padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:rgba(255,255,255,.55);min-height:112px}
+.werkzeug{width:92px;height:92px;border-radius:24px;background:#fff;border:none;display:flex;align-items:center;
+  justify-content:center;font-size:54px;box-shadow:0 5px 0 rgba(0,0,0,.14);padding:0;touch-action:none;position:relative}
+.werkzeug svg{width:68px;height:68px;pointer-events:none}
+.werkzeug.dran{animation:puls 1.3s ease-in-out infinite;box-shadow:0 0 0 6px #FFD84D,0 5px 0 rgba(0,0,0,.14)}
+.werkzeug.wackel{animation:wackel .5s ease-in-out 3}
+.werkzeug.weg{opacity:.35}
+.werkzeug.fertig{background:#5BC26B;color:#fff;font-size:58px;font-weight:700;width:120px}
+#ghost{position:fixed;z-index:50;pointer-events:none;font-size:80px;width:100px;height:100px;margin:-50px 0 0 -50px;
+  display:none;align-items:center;justify-content:center;filter:drop-shadow(0 6px 4px rgba(0,0,0,.25))}
+#ghost svg{width:84px;height:84px}
+.teilchen{position:fixed;z-index:40;pointer-events:none}
+.blubb{width:18px;height:18px;border-radius:50%;border:3px solid #fff;background:rgba(255,255,255,.4);animation:blubb .8s ease-out forwards}
+.tropf{width:10px;height:16px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:#5AB4F0;animation:tropf .6s ease-in forwards}
+.luft{width:34px;height:5px;border-radius:3px;background:rgba(255,255,255,.95);animation:luft .5s ease-out forwards}
+.glitzer{font-size:28px;animation:blubb .9s ease-out forwards}
+.herz{font-size:44px;animation:herz 1.4s ease-out forwards}
+#konfetti{position:fixed;inset:0;pointer-events:none;z-index:60}
+.konf{position:absolute;top:-20px;width:14px;height:20px;border-radius:3px;animation:fall 2.4s linear forwards}
+
+/* Start */
+#start{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  background:radial-gradient(circle at 50% 40%,#8FD6C8,#4FA89A)}
+#start .big{font-size:120px;animation:hopp 1.6s ease-in-out infinite}
+#start h1{margin:0;color:#fff;font-size:56px;text-shadow:0 4px 0 rgba(0,0,0,.15)}
+#go{font-family:inherit;font-size:64px;border:none;border-radius:999px;background:#FFD84D;color:var(--ink);
+  width:180px;height:120px;box-shadow:0 8px 0 #D9AE1D;animation:puls 1.3s ease-in-out infinite}
+
+@keyframes hopp{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes puls{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@keyframes wackel{0%,100%{transform:rotate(0)}25%{transform:rotate(-14deg)}75%{transform:rotate(14deg)}}
+@keyframes blubb{0%{transform:translate(0,0) scale(.5);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(1.3);opacity:0}}
+@keyframes tropf{0%{transform:translateY(0);opacity:1}100%{transform:translateY(90px);opacity:0}}
+@keyframes luft{0%{transform:translateX(0);opacity:1}100%{transform:translateX(var(--dx));opacity:0}}
+@keyframes herz{0%{transform:translateY(0) scale(.4);opacity:0}20%{opacity:1;transform:translateY(-20px) scale(1)}100%{transform:translateY(-160px) scale(1.2);opacity:0}}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+@keyframes reinflattern{0%{transform:translateY(-60vh) rotate(-20deg)}100%{transform:rotate(var(--r))}}
+@keyframes freude{0%,100%{transform:translateY(0)}30%{transform:translateY(-8%)}60%{transform:translateY(0)}}
+#tier.freude{animation:freude .7s ease-in-out 2}
+#tier.mampf .maul{animation:mampf .25s ease-in-out 6}
+@keyframes mampf{50%{transform:scaleY(.4)}}
+
+/* Bilder-Modus (assets/ vorhanden) */
+body.bilder #warte{background:#FFF4E4 url(./assets/bg-warte.webp) center bottom/cover no-repeat}
+body.bilder #raum{background:#D6EFEA url(./assets/bg-raum.webp) center bottom/cover no-repeat}
+body.bilder #fenster,body.bilder #bild,body.bilder #pflanze{display:none}
+body.bilder .patient .kissen{background:#FFB3CC;box-shadow:0 5px 0 #E88FAE}
+.wabbel{animation:wabbel 1.8s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+.glitzern{animation:glitzern 1.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+.pochen{animation:pochen 1.2s ease-in-out infinite;transform-box:fill-box;transform-origin:center bottom}
+@keyframes wabbel{0%,100%{transform:scale(1)}50%{transform:scale(1.08,.94)}}
+@keyframes glitzern{0%,100%{transform:translateY(0);filter:brightness(1)}50%{transform:translateY(-3px);filter:brightness(1.25)}}
+@keyframes pochen{0%,100%{transform:rotate(0)}50%{transform:rotate(-7deg)}}
+.weg-anim{position:fixed;z-index:45;pointer-events:none;animation:puff .7s ease-out forwards}
+.weg-anim.plopp{animation:plopp .8s cubic-bezier(.3,1.4,.6,1) forwards}
+@keyframes puff{to{transform:scale(1.6);opacity:0}}
+@keyframes plopp{30%{transform:translate(10px,-70px) rotate(-30deg)}100%{transform:translate(40px,-40px) rotate(-120deg) scale(.4);opacity:0}}
+#schichtA,#schichtB{position:fixed;z-index:5;pointer-events:none;display:none}
+#schichtB{mix-blend-mode:multiply}
+#hopvid{position:fixed;z-index:30;pointer-events:none;display:none;object-fit:contain}
+#hopser{position:fixed;z-index:30;pointer-events:none;display:none;background-repeat:no-repeat;background-size:3600% 100%}
+#hopser.an{display:block;animation:hopsen 3s steps(35) forwards}
+@keyframes hopsen{from{background-position:0 0}to{background-position:100% 0}}
+
+@media (orientation:portrait){
+  #bank{flex-wrap:wrap;align-content:flex-end;padding-bottom:2vh}
+  .patient{max-width:48vw;flex-basis:46%}
+  .patient svg{max-height:28vh}
+  #fotowand{height:14vh}
+  #tier{width:100%;height:auto;max-height:100%}
+  .werkzeug{width:96px;height:96px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <button class="chip aus" id="home" aria-label="Wartezimmer">🏠</button>
+    <div class="sign">🐾 Tierpraxis</div>
+    <div class="stats">
+      <span class="chip" id="sterneChip">⭐ <b id="sterne">0</b></span>
+      <button class="chip" id="fs" aria-label="Vollbild">⛶</button>
+    </div>
+  </header>
+  <div id="buehne">
+    <section class="szene an" id="warte">
+      <div id="fenster"><span>☀️</span><span class="wolke">☁️</span></div>
+      <div id="bild">🐾</div>
+      <div id="pflanze">🪴</div>
+      <div id="bank"></div>
+      <div id="fotowand"></div>
+    </section>
+    <section class="szene" id="raum">
+      <div id="tischwrap"><svg id="tier" viewBox="0 -20 400 332"></svg></div>
+      <div id="ablage"></div>
+    </section>
+  </div>
+</div>
+<div id="ghost"></div>
+<div id="hopser"></div>
+<canvas id="schichtA"></canvas><canvas id="schichtB"></canvas>
+<video id="hopvid" muted playsinline preload="auto"></video>
+<div id="konfetti"></div>
+<div id="start"><div class="big">🐶</div><h1>Tierpraxis</h1><button id="go" aria-label="Los">▶</button></div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const SAVE_KEY = 'tierpraxis-spielstand';
+const S = {sterne:0, behandelt:0, fotos:[], bekannt:['hund','katze']};
+let patienten = [], aktiv = null, rundeFertig = 0;
+
+function load(){ try{ Object.assign(S, JSON.parse(localStorage.getItem(SAVE_KEY)||'{}')); }catch(e){} }
+function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }catch(e){} }
+const rnd = a => a[Math.floor(Math.random()*a.length)];
+const mischen = a => { a = a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+
+/* ================= Ton ================= */
+let AC = null;
+function ac(){
+  if(!AC){ try{ AC = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} }
+  if(AC && AC.state === 'suspended') AC.resume();
+  return AC;
+}
+function tone(f, d=.12, type='sine', vol=.16, delay=0, slide=0){
+  const a = ac(); if(!a) return;
+  const t = a.currentTime + delay, o = a.createOscillator(), g = a.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, t);
+  if(slide) o.frequency.exponentialRampToValueAtTime(f*slide, t+d);
+  g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t+.01);
+  g.gain.exponentialRampToValueAtTime(.0001, t+d);
+  o.connect(g).connect(a.destination); o.start(t); o.stop(t+d+.03);
+}
+function rauschen(d=.25, freq=2000, vol=.06){
+  const a = ac(); if(!a) return;
+  const n = Math.floor(a.sampleRate*d), b = a.createBuffer(1, n, a.sampleRate), c = b.getChannelData(0);
+  for(let i=0;i<n;i++) c[i] = (Math.random()*2-1) * (1 - i/n);
+  const s = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
+  s.buffer = b; f.type = 'bandpass'; f.frequency.value = freq; g.gain.value = vol;
+  s.connect(f).connect(g).connect(a.destination); s.start();
+}
+const SFX = {
+  pop:   () => tone(520, .1, 'sine', .2, 0, 1.8),
+  klick: () => tone(700, .06, 'triangle', .12),
+  nope:  () => tone(210, .14, 'square', .04),
+  ding:  () => { tone(1318, .4, 'sine', .15); tone(1760, .5, 'sine', .1, .08); },
+  jubel: () => [523,659,784,1047].forEach((f,i) => tone(f, .2, 'triangle', .16, i*.1)),
+  schnipp: () => { tone(2400, .04, 'square', .05); tone(1800, .05, 'square', .04, .05); },
+  plopp: () => tone(300, .15, 'sine', .25, 0, 2.5),
+  mampf: () => [0,.25,.5].forEach(d => tone(180, .08, 'triangle', .14, d)),
+  quietsch: () => tone(900, .08, 'sine', .06, 0, 1.3),
+  wasser: () => rauschen(.3, 3500, .07),
+  wind:   () => rauschen(.3, 900, .08),
+  fanfare: () => [523,659,784,659,784,1047].forEach((f,i) => tone(f, .22, 'triangle', .15, i*.13))
+};
+
+/* ================= Sprache: eine Warteschlange ================= */
+const Voice = (() => {
+  const HAS = 'speechSynthesis' in window;
+  let voice = null, queue = [], playing = false, epoch = 0;
+  function pick(){ if(!HAS) return; voice = speechSynthesis.getVoices().find(v => v.lang && v.lang.toLowerCase().startsWith('de')) || null; }
+  if(HAS){ pick(); speechSynthesis.onvoiceschanged = pick; }
+  const est = (t, r) => Math.min(12000, 900 + (t.length / Math.max(.5, r)) * 90);
+  function speakOne(item){
+    return new Promise(res => {
+      if(!HAS) return res();
+      let done = false; const fin = () => { if(!done){ done = true; clearTimeout(wd); res(); } };
+      const u = new SpeechSynthesisUtterance(item.text);
+      u.lang = 'de-DE'; if(voice) u.voice = voice; u.rate = item.rate || .92; u.pitch = item.pitch || 1.12;
+      u.onend = fin; u.onerror = fin;
+      const wd = setTimeout(fin, est(item.text, u.rate));
+      speechSynthesis.speak(u);
+    });
+  }
+  async function run(){
+    if(playing) return; playing = true; const mine = epoch;
+    while(queue.length && mine === epoch){
+      const it = queue.shift();
+      if(it.text) await speakOne(it);
+      if(it.pause && mine === epoch) await new Promise(r => setTimeout(r, it.pause));
+    }
+    if(mine === epoch) playing = false;
+  }
+  const norm = x => typeof x === 'string' ? {text:x} : x;
+  return {
+    say(items){ queue.push(...[].concat(items).filter(Boolean).map(norm)); run(); },
+    flush(){ epoch++; queue = []; playing = false; if(HAS) speechSynthesis.cancel(); },
+    replace(items){ this.flush(); this.say(items); }
+  };
+})();
+
+/* ================= Bilder (assets/) =================
+   Liegt der Ordner assets/ neben dem Spiel, werden die gemalten Bilder benutzt.
+   Fehlt er, zeichnet das Spiel die Tiere selbst (SVG). */
+const ASSET_DIR = './assets/';
+let BILDER = false;
+const bilderBereit = new Promise(res => {
+  const im = new Image();
+  im.onload = () => { BILDER = true; document.body.classList.add('bilder'); res(true); };
+  im.onerror = () => res(false);
+  im.src = ASSET_DIR + 'hund-normal.webp';
+});
+/* Vermessene Punkte in den Bildern (viewBox-Einheiten 0 -20 400 320):
+   feet = Pfoten/Hufe von links nach rechts, mund, body = Stellen am Körper für Schlamm/Knoten */
+const BILD_GEO = {
+  hund:   {feet:[[77,274],[151,274],[258,274],[309,274]], mund:[312,116],
+           body:[[214,152],[100,200],[278,192],[140,138]]},
+  katze:  {feet:[[97,275],[173,275],[276,275],[328,275]], mund:[316,126],
+           body:[[208,166],[116,206],[276,192],[146,144]]},
+  pony:   {feet:[[118,277],[181,277],[265,277],[310,277]], mund:[309,131],
+           body:[[195,157],[117,143],[262,196],[88,200]]},
+  hase:   {feet:[[125,281],[181,281],[262,281],[311,281]], mund:[302,158],
+           body:[[202,182],[100,175],[250,212],[146,210]]},
+  einhorn:{feet:[[129,277],[189,277],[271,277],[311,277]], mund:[310,132],
+           body:[[187,155],[88,205],[260,200],[108,130]]}
+};
+/* Umrisse der gemalten Tiere (200×160, lauflängenkodiert, aus den *-normal.webp berechnet).
+   Damit weiß das Spiel, wo Fell ist, ohne die Bilder auslesen zu müssen. */
+const BILD_MASKE = {
+  hund:'zz11K035B0202055A095A090102520M4V0R4Q0W4N0Z4J154E184A1C471E451G431I411K3X1O3U1Q3T1S3R1U3P1W3N1X3M1Z3L203J223H243G251I011V271C091S28190C1Q2B150D1Q2D130E1Q2D120E1Q2F100E1Q2H0Y0F1Q2H0X0F1Q2J0V0F1Q2K0U0G1P2L0U0G1P2M0S0G1P2N0S0G1P2M0S0H1O2N0S0H1O2N0S0G1O2O0R0H1O2O0R0H1O2O0R0H1O2N0S0H1O2N0S0H1O2N0S0H1O2N0S0I1N2M0T0I1N2M0T0I1O2L0T0J1N2M0S0J1O2L0S0K1N2L0S0K1O2K0T0K1O2J0T0L1N21020G0T0M1N20020G0U0M0C0J0S1Y040E0V0O070R0O1W060D0W0O030Y0J1W080B0X1U0A1Y0B090Z400E06103Z1M3W1P3T1S3P1W3L203J223I243G263E283C293B293B283C283C273D273D263E263E253F253F253F253F243G243G243G243G243G243F253F253F253F253E263E263D283B293B293B293A2A3A2A3A293B293A2A3A293B283C273D263E251G021X241H041W221I071T211I0C1P211I0I070418211H0U18201I0V17200T020M0W0N010J200R040L0X0N010K1Z0P050M0X0N020J1Z0N070L0Z0M020J1Z0L0A0K0Z0M020J1Z0K0B0K0Z0M030J1Y0J0C0K0Z0M030J1Y0J0D0K0Z0L040I1Y0J0D0K0Z0L040J1X0J0E0J0Z0M030J1X0J0E0K0Z0L040J1W0J0F0M0W0L040K1V0J0F0O0U0L040N1S0J0G0P0T0L040O1Q0J0H0O0T0L040P1P0K0H0O0S0L050P1O0M0F0O0S0M040Q1O0M0F0O0S0N030P1O0N0E0O0S0O020P1O0O0E0N0S0P020O1O0O0F0L0T0Q010O1O0O0F0L0U0P020N1O0O0G0J0V0Q010N1P0N0I0E0Y0Q020L1Q0N0L03170P030J1S0L1W0P050E1V0K1X0P0804240H1Z0N2K020205250L510H56040105TM',
+  katze:'zz12B025G055D085B09590C570D560F540G530H520I510K4Z0L4Y0M4H01020301020201040N3J070Q143I0B0L163H0F0F193H0I0A1C3G0J071D1H061U0L031G1D0B1R251B0D1R25190G1Q24190H1Q24180H1R24170I1R24160J1R24150J1S24140J1T24130K1T24130J1V23120J1W23120J1W22120J1X22110J1Z21110J1Z21100K1Z220Z0J20220Z0J21220X0K21220X0J23220W0J23220W0J24210V0K24220U0K25210U0K25210U0K26200U0K271Z0U0K281Y0U0K281Y0U0L271Y0U0L271Y0U0L271Y0V0L261Y0V0L251Y0W0M251Y0V0M251X0X0M231X0Y0N221X0Y0N231V100O211V100O211U120P0S04131T130Q0L0I0V1S150R0G0P0T1P170T0A0W0P1O180Y02140I1P1A28091R1D451G431I3Z1M3W1P3S1T3R1U3P1W3O1Y3M203K223I253F293B293B293B283C283C283C273D273D273C283D263D283C283C273D273C283C283B2A3A2A3A2A392B382C382C382C382C382C382C382B392B392A3A293B283C273D261G041V241H081R231H0F1L221I0T17221H0U17221H0V0M010K201H0W0M010K201H0W0M020J200S020M0X0M020J200P050M0Y0L020K1Z0N080K0Z0L030J1Z0M090K0Z0L030J1Z0K0B0K0Z0M030I1Z0K0C0J100L030J1Y0J0D0K0Z0L040I1Y0J0E0J0Z0L040J1X0J0E0J0Z0L040J1X0J0F0J0Z0K050J1W0J0F0K0Y0L040J1W0J0G0K0X0L050J1W0I0H0N0U0K050L1U0J0G0O0T0K060M1S0J0H0O0S0L050O1Q0L0G0O0R0M050N1Q0N0E0O0S0N030O1P0O0E0N0S0O030N1P0O0F0N0R0P020O1P0N0F0M0T0O030N1P0O0F0L0T0P020N1P0O0G0K0T0P030L1R0N0H0I0V0O030L1R0M0K0D0Y0O040J1T0L1W0M070G1W0H1Z0L0A04020224020105260J530DTB',
+  pony:'QT035G054Z0708074S01030808094P020209080B4M0401090202050B4L0M010D4G0102114G0102114F164D173Y050A173X0807183W0B041A3V0D011B3V1P3U1Q3U1Q3U1Q3U1P3V1P3V1P3V1O3W1O3W1N3Y1M3Y1N3X1O3X1O3W1P3W1O3W1P3U1Q3T1S3R1T3R1R01013Q1S3R1U3Q1U3Q1V3O02011T3R1U3P1V3O1X3M1Y3M1Y3L1Z3L1Z3K203K203K203K1Z3L1Z3L02011W3L01011X3L01011W3O1W1V081L1W1U0C1H1W1U0F1F1W1R0J1D1W1Q0N1A1X1P0P0D0A0K1Y1O0S080I0F1Y1O0T050O0E1V1O0V020T0A1V1O3V1P3U1P3T1Q3S1S3O1V3K203K1Z3K203K2001013I223I213J213K203K1Z3L1Z3L1Z3M1X3N1X3N1X3N1W3O1W3O1V3P1U3Q1U3Q1T3R1S3S1R03023N1W3O1W3O1V3O1W3O1V3O1V3P1V0X012Q1W0X012Q1V0Y012Q1V0Y022O1W0Y022O1W0X032O1W0X032O1W0X022P1W0X022P1W02010T022Q1W02010T0214011L1W02010S0215041I1X01010R0116091E1X01010Q01170P0Y1Z0P01170Q0Y200O01160R0Y201V0R0Z1Z0N01160T0Y1Z0N01160T0Y1Z0M020L010J0U0Y1Y0N020K020J0U0Y1Y0M020K030J0U0Z1W0M030J050I0V0H010G1V0M040I060I0V0H010G1V03020G050I060I0V0G020G200B0103060H080H0V0H020G1Y0B0103070H080I0U0H020G1Y080401090H090H0V0G020G2K0H090I0U0G020H2J0H0A0H0U0G030G2J0H0A0I0T0G030G2I0I0A0I0T0G030H2H0I0B0I0S0G030H2H0I0B0I0S0H030H2G0I0B0J0R0H030H2G0I0C0I0R0H030I2F0J0B0J0Q0H030J2E0J0B0K0P0I030J2D0K0B0K0O0I030J2D0K0B0K0O0J030J2C0L0B0K0N0J030J2D0K0B0K0N0K030J2C0K0C0K0M0K030J2C0K0C0K0N0J030J2D0K0C0J0N0J030K2C0K0C0J0N0K030J2C0K0D0I0N0K030J2C0K0D0I0N0K030J2D0J0E0H0N0K040H2E0J0H0B0R0J060D2I0F1M0H39011V0CNX',
+  hase:'A8025F063T051F083R081B0B3P0B180C3P0C160E3N0E140F3N0G120F3N0H100G3M0J0Y0H3M0K0W0J3L0L0U0K3L0M0T0K3L0M0S0L3L0N0R0L3L0O0P0M3L0P0O0M3L0P0N0N3L0Q0M0N3L0Q0L0O3L0R0K0O3L0S0J0O3L0S0I0P3L0T0H0P3L0T0H0P3L0T0H0P3M0T0G0O3N0T0G0O3N0U0E0P3N0U0E0P3O0T0E0O3P0U0D0O3P0U0D0O3Q0T0D0N3R0U0C0N3S0T0C0N3S0T0B0N3U0S0A0O3U0S0601010P3W0S040S3W0S030S3Y0R020T3Z0Q010T411J421H441F461E471D481D491C491B4A1B4B1A4B194B1A4A1A491C481C471D471E461E451F451G441G441G441H431H431H431I411K401K401L3Y1N3W1O2S0A0U1P2M0J0P1Q2J0P0M1Q2H0U0I1R2F0Y0G1R2D130D1R2C160B1R2A1B081R1S09081G041Q1Q0D063B1O0G053A1O0I023C1N0K013B1N3W1O3V1O3V1O3U1Q3S1R3S1S3P1V3N1W3L1Z3I223I223I223I223I223J223I223I223J213J213J223I223I233H243G253F253E283C2A3A2C372I322I322J302K302K2Z2L2Z2M2X2N2X2O2W2O2W2O2W2O2W2N2X2M2Y2L2Z2K302K302K312J312I1F010E030L010J2I1D0K0L010J2I1D0K0L010K2I1B0M0K020J2I0M030M0M0K020J2I0M030N0L0K030I2I0M030O0K0L020J2H0M040P0J0K030K2G0M040Q0H0K030O2C0O020R0G0L020P2B0P020R0G1C2B0P020R0F1D2A0Q020Q0G1C2B0P030P0G1D2A0P040O0G1D2A0P050N0H1C2B0O060M0H0O010N2C0N070K0I0O010M2D0M090H0L0N020K2F0K0D0601030Q0L050H2I0G1G0K080A4K0FCS',
+  einhorn:'LB035G045F045G045F055E065D074V060C064T0D07074Q0I040803034J0K030802054G0W02074603050X01084506031743080118431H421I421I421I421I411J411J411J411J411J411I411J411I411K401M3X1O3W1P3U1Q3T1S3S1S3R1U3Q1U3Q1U3P1V3P1U3P1V3P1U3Q1U3Q1T3R1T3Q1T3R1T3R1T3R1U3Q1U3Q1V3Q1U3Q1U3Q1U3Q1U3P1V3P1V1T0C1K1V1R0H1H1V1P0K1F1W1N0O1C1W1N0Q1A1X1M0S15201M0U14201L0W151X1L0Y0D070K1W1L0Z080G0G1W1K11050L0C1W1L11030S071V1L3Y1M3X1M3W1O3U1Q3P1U3L1Z3L1Z3M1Y3M1Y3M1Y3N1X3O1W3P1V3M02011V3N1X3N1X3N1X3N1X3N1X3N1W3O1W3O1W3O1V3O1V3O1R3T1S3R1T3Q1V3P1Z3K1Z3L1Y3M1X3M1X3N1W3O1W3N1W3O1W14012J1V15012J1V15012J1V14022J1V14012K1V3P1V25031H1V25071D1V250D08020X1V240P0W1W230P0X1V220Q0X1W0W01130R0X1X0U02130S0W1Y0S030J010J0S0W1Z0R030I020I0T0X1Z0P040I020I0T0X200O030I040H0U0W1V01040O030I040H0U0W1V02030O030H060H0T0G010G1U0T030H060H0T0G010G1U0U020G080G0T0G010G1V1B080H0S0G020G1U0T020G080H0T0F020G1V0Q040G090H0S0F020G1X0N050G090H0S0G020G1X0M050G0A0H0R0G020G1X0M050G0A0H0R0G020H1Y0J050H0A0I0Q0G020H1Z0H060H0B0H0Q0H020H1Z0F070I0A0I0P0H020I200C080I0A0J0O0H020I22080A0J0A0I0O0I020I2J0J0A0J0N0I020J2I0K090K0M0J010J2I0K0A0J0M0J020J2I0J0A0K0M0J010J2I0K0A0J0M0J020J2H0K0A0K0L0K010J2H0L0A0J0L0K010J2I0K0A0J0M0J020I2I0K0B0I0M0J020J2H0K0B0I0M0K010J2I0J0C0H0M0K020H2K0I0E0C0Q0J040D2N0F1J0H3A051Q0DNT'
+};
+/* Hüpf-Animation: Streifen mit 36 Bildern, Tier darin auf 80 % verkleinert bei (112,363) von 1120 */
+const HOPS = {k: 400/(1120*0.8)};
+function punkte(art){
+  if(BILDER) return BILD_GEO[art];
+  const g = geo(art), [bx,by,rx,ry] = g.body;
+  return {feet: fuesse(art), mund: g.mund,
+          body: [[-.5,-.25],[.2,-.4],[.6,.25],[-.15,.4]].map(([fx,fy]) => [Math.round(bx+fx*rx), Math.round(by+fy*ry)])};
+}
+
+/* ================= Tiere ================= */
+const TIERE = {
+  hund:   {Der:'Der Hund', den:'den Hund', name:'Hund', fell:'#C98B52', hell:'#F3D7B6', dunkel:'#8A5A30', fuss:'pfote', leckerli:'🦴'},
+  katze:  {Der:'Die Katze', den:'die Katze', name:'Katze', fell:'#F2A15A', hell:'#FFE3C4', dunkel:'#C06A25', fuss:'pfote', leckerli:'🐟'},
+  pony:   {Der:'Das Pony', den:'das Pony', name:'Pony', fell:'#B77A4E', hell:'#E8C7A6', dunkel:'#6E4128', fuss:'huf', leckerli:'🍎', maehne:['#5A3520']},
+  hase:   {Der:'Der Hase', den:'den Hasen', name:'Hase', fell:'#D8CFC4', hell:'#FFFFFF', dunkel:'#A0948A', fuss:'pfote', leckerli:'🥕'},
+  einhorn:{Der:'Das Einhorn', den:'das Einhorn', name:'Einhorn', fell:'#FBF8FF', hell:'#FFFFFF', dunkel:'#D6CCE8', fuss:'huf', leckerli:'🍎',
+           maehne:['#FF8FB1','#FFC26B','#8FD6A0','#7DB8F2','#B79AF2']}
+};
+const FREISCHALTEN = [{ab:3, art:'pony'}, {ab:6, art:'hase'}, {ab:10, art:'einhorn'}];
+
+/* Geometrie je Tier (viewBox 0 -20 400 320, Boden bei y≈285) */
+function geo(art){
+  if(art === 'pony' || art === 'einhorn') return {
+    body:[178,150,102,50], legTop:160, legBottom:270, legW:24, legsX:[138,110,248,222],
+    head:[318,62], mund:[318,112], huf:true };
+  if(art === 'hase') return {
+    body:[180,188,92,66], head:[270,116], mund:[270,142],
+    legsX:[128,160,248,272], legTop:0, legBottom:0, feetY:282 };
+  if(art === 'katze') return {
+    body:[185,178,96,50], legTop:185, legBottom:276, legW:24, legsX:[140,114,258,234],
+    head:[298,118], mund:[298,142] };
+  return {body:[188,170,100,56], legTop:176, legBottom:276, legW:28, legsX:[146,116,264,236],
+    head:[300,106], mund:[300,134] };
+}
+function fuesse(art){
+  const g = geo(art);
+  if(art === 'hase') return [[128,282],[160,284],[236,283],[258,284]];
+  return g.legsX.map(x => [x, g.legBottom + (g.huf ? 8 : 4)]);
+}
+function darker(hex, f=.82){
+  const n = parseInt(hex.slice(1),16);
+  const c = [n>>16, (n>>8)&255, n&255].map(v => Math.round(v*f));
+  return '#' + c.map(v => v.toString(16).padStart(2,'0')).join('');
+}
+
+/* ---- Zeichnen ---- */
+function gesicht(cx, cy, stimmung, T, gross=1){
+  const e = 17*gross, ey = cy-6*gross;
+  let s = '';
+  if(stimmung === 'froh'){
+    s += `<path d="M${cx-e-8},${ey+2} q8,-10 16,0 M${cx+e-8},${ey+2} q8,-10 16,0" stroke="#2B2B2B" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+  } else {
+    for(const x of [cx-e, cx+e]){
+      s += `<circle cx="${x}" cy="${ey}" r="8" fill="#2B2B2B"/><circle cx="${x+3}" cy="${ey-3}" r="3" fill="#fff"/>`;
+    }
+    if(stimmung !== 'normal'){
+      s += `<path d="M${cx-e-10},${ey-12} l15,-6 M${cx+e+10},${ey-12} l-15,-6" stroke="#2B2B2B" stroke-width="3.5" stroke-linecap="round"/>`;
+    }
+  }
+  if(stimmung === 'krank' || stimmung === 'froh'){
+    const c = stimmung === 'krank' ? '#FF5A5A' : '#FF9EB5';
+    s += `<ellipse cx="${cx-e-12}" cy="${ey+18}" rx="9" ry="6" fill="${c}" opacity=".7"/><ellipse cx="${cx+e+12}" cy="${ey+18}" rx="9" ry="6" fill="${c}" opacity=".7"/>`;
+  }
+  if(stimmung === 'krank') s += `<path d="M${cx+e+22},${ey-18} q6,10 0,14 q-6,-4 0,-14z" fill="#8FD0FF"/>`;
+  return s;
+}
+function maul(cx, cy, stimmung){
+  if(stimmung === 'froh')
+    return `<g class="maul" style="transform-origin:${cx}px ${cy}px"><path d="M${cx-12},${cy-2} q12,16 24,0 z" fill="#C2405A" stroke="#2B2B2B" stroke-width="3" stroke-linejoin="round"/></g>`;
+  if(stimmung === 'normal')
+    return `<g class="maul" style="transform-origin:${cx}px ${cy}px"><path d="M${cx-10},${cy-2} q5,6 10,0 q5,6 10,0" stroke="#2B2B2B" stroke-width="3" fill="none" stroke-linecap="round"/></g>`;
+  return `<g class="maul" style="transform-origin:${cx}px ${cy}px"><path d="M${cx-9},${cy+4} q9,-9 18,0" stroke="#2B2B2B" stroke-width="3" fill="none" stroke-linecap="round"/></g>`;
+}
+
+function fussMalen(x, y, T, huf, lack, far){
+  const f = far ? darker(T.fell,.85) : T.fell;
+  if(huf){
+    return `<rect x="${x-16}" y="${y-10}" width="32" height="18" rx="5" fill="${lack||'#4A3A33'}" stroke="${lack?darker(lack,.75):'#2E2420'}" stroke-width="2"/>`;
+  }
+  return `<ellipse cx="${x+4}" cy="${y}" rx="20" ry="10" fill="${f}"/>`;
+}
+function krallen(x, y, lang, lack){
+  const c = lack || '#F4F1EA', st = lack ? darker(lack,.7) : '#B8B2A6';
+  let s = '';
+  for(let i=0;i<3;i++){
+    const bx = x + 12 + i*6, by = y + 2 - i*3;
+    s += lang
+      ? `<path d="M${bx},${by-3} l18,${4+i} l-18,${5}" fill="${c}" stroke="${st}" stroke-width="1.5" stroke-linejoin="round"/>`
+      : `<path d="M${bx+4},${by-3} l7,3 l-7,4" fill="${c}" stroke="${st}" stroke-width="1.5" stroke-linejoin="round"/>`;
+  }
+  return s;
+}
+
+function kopfMalen(art, T, g, stimmung){
+  const [cx, cy] = g.head; let s = '';
+  if(art === 'hund'){
+    s += `<ellipse cx="${cx-48}" cy="${cy+6}" rx="17" ry="34" fill="${T.dunkel}" transform="rotate(22 ${cx-48} ${cy+6})"/>`;
+    s += `<ellipse cx="${cx+48}" cy="${cy+6}" rx="17" ry="34" fill="${T.dunkel}" transform="rotate(-22 ${cx+48} ${cy+6})"/>`;
+    s += `<circle cx="${cx}" cy="${cy}" r="50" fill="${T.fell}"/>`;
+    s += `<ellipse cx="${cx}" cy="${cy+24}" rx="30" ry="22" fill="${T.hell}"/>`;
+    s += gesicht(cx, cy-4, stimmung, T);
+    s += `<ellipse cx="${cx}" cy="${cy+14}" rx="10" ry="7" fill="#2B2B2B"/>`;
+    s += maul(cx, cy+30, stimmung);
+  } else if(art === 'katze'){
+    s += `<path d="M${cx-40},${cy-18} L${cx-34},${cy-66} L${cx-6},${cy-38} Z" fill="${T.fell}"/><path d="M${cx-32},${cy-26} L${cx-30},${cy-54} L${cx-14},${cy-38} Z" fill="#FFB3C6"/>`;
+    s += `<path d="M${cx+40},${cy-18} L${cx+34},${cy-66} L${cx+6},${cy-38} Z" fill="${T.fell}"/><path d="M${cx+32},${cy-26} L${cx+30},${cy-54} L${cx+14},${cy-38} Z" fill="#FFB3C6"/>`;
+    s += `<ellipse cx="${cx}" cy="${cy}" rx="48" ry="44" fill="${T.fell}"/>`;
+    s += `<path d="M${cx-10},${cy-42} l4,14 M${cx},${cy-44} l0,15 M${cx+10},${cy-42} l-4,14" stroke="${T.dunkel}" stroke-width="4" stroke-linecap="round"/>`;
+    s += `<ellipse cx="${cx}" cy="${cy+20}" rx="24" ry="15" fill="${T.hell}"/>`;
+    s += gesicht(cx, cy-2, stimmung, T, .95);
+    s += `<path d="M${cx-6},${cy+10} h12 l-6,7 z" fill="#FF8FA8"/>`;
+    s += `<path d="M${cx-18},${cy+18} h-32 M${cx-18},${cy+24} l-30,6 M${cx+18},${cy+18} h32 M${cx+18},${cy+24} l30,6" stroke="#6B5B4E" stroke-width="2" stroke-linecap="round"/>`;
+    s += maul(cx, cy+26, stimmung);
+  } else if(art === 'hase'){
+    s += `<ellipse cx="${cx-20}" cy="${cy-78}" rx="15" ry="46" fill="${T.fell}" transform="rotate(-10 ${cx-20} ${cy-78})"/><ellipse cx="${cx-20}" cy="${cy-76}" rx="7" ry="34" fill="#FFB3C6" transform="rotate(-10 ${cx-20} ${cy-78})"/>`;
+    s += `<ellipse cx="${cx+20}" cy="${cy-78}" rx="15" ry="46" fill="${T.fell}" transform="rotate(12 ${cx+20} ${cy-78})"/><ellipse cx="${cx+20}" cy="${cy-76}" rx="7" ry="34" fill="#FFB3C6" transform="rotate(12 ${cx+20} ${cy-78})"/>`;
+    s += `<ellipse cx="${cx}" cy="${cy}" rx="46" ry="42" fill="${T.fell}" stroke="${T.dunkel}" stroke-width="2.5"/>`;
+    s += `<ellipse cx="${cx}" cy="${cy+20}" rx="24" ry="16" fill="${T.hell}"/>`;
+    s += gesicht(cx, cy-2, stimmung, T, .95);
+    s += `<path d="M${cx-6},${cy+10} h12 l-6,7 z" fill="#FF8FA8"/>`;
+    s += `<rect x="${cx-7}" y="${cy+30}" width="14" height="10" rx="2" fill="#fff" stroke="#bbb"/>`;
+    s += maul(cx, cy+26, stimmung);
+  } else { // pony / einhorn
+    s += `<path d="M${cx-30},${cy-40} L${cx-38},${cy-74} L${cx-12},${cy-50} Z" fill="${T.fell}" stroke="${T.dunkel}" stroke-width="2"/>`;
+    s += `<path d="M${cx+30},${cy-40} L${cx+38},${cy-74} L${cx+12},${cy-50} Z" fill="${T.fell}" stroke="${T.dunkel}" stroke-width="2"/>`;
+    s += `<ellipse cx="${cx}" cy="${cy}" rx="40" ry="54" fill="${T.fell}" stroke="${T.dunkel}" stroke-width="2.5"/>`;
+    s += `<ellipse cx="${cx}" cy="${cy+36}" rx="32" ry="24" fill="${T.hell}"/>`;
+    s += `<ellipse cx="${cx-10}" cy="${cy+36}" rx="4" ry="6" fill="${T.dunkel}"/><ellipse cx="${cx+10}" cy="${cy+36}" rx="4" ry="6" fill="${T.dunkel}"/>`;
+    // Stirnlocke
+    const m = T.maehne;
+    m.forEach((c,i) => { s += `<path d="M${cx-18+i*8},${cy-56} q${-10+i*4},18 ${-2+i*3},30" stroke="${c}" stroke-width="9" fill="none" stroke-linecap="round"/>`; });
+    if(art === 'einhorn'){
+      s += `<path d="M${cx-9},${cy-54} L${cx},${cy-110} L${cx+9},${cy-54} Z" fill="#FFD84D" stroke="#E0A800" stroke-width="2"/>`;
+      s += `<path d="M${cx-6},${cy-66} l12,-4 M${cx-4},${cy-80} l9,-3 M${cx-2},${cy-94} l5,-2" stroke="#E0A800" stroke-width="2"/>`;
+    }
+    s += gesicht(cx, cy-4, stimmung, T, .9);
+    s += maul(cx, cy+50, stimmung);
+  }
+  return s;
+}
+
+function tierMalen(p, opt={}){
+  if(BILDER) return tierBild(p, opt);
+  const art = p.art, T = TIERE[art], g = geo(art), F = fuesse(art);
+  const lack = p.lack || {};
+  const langeKralle = i => (p.ziele||[]).some(z => z.art === 'kralle' && z.fuss === i);
+  let s = '';
+  // Schatten
+  if(!opt.mini) s += `<rect x="10" y="291" width="380" height="16" rx="8" fill="#fff"/><rect x="10" y="303" width="380" height="6" rx="3" fill="#9CC9BF"/>`;
+  s += `<ellipse cx="195" cy="288" rx="150" ry="9" fill="rgba(0,0,0,.10)"/>`;
+  const [bx, by, rx, ry] = g.body;
+  // Schwanz
+  if(art === 'hund') s += `<path d="M${bx-rx+8},${by-18} q-40,-20 -30,-70" stroke="${T.fell}" stroke-width="16" fill="none" stroke-linecap="round"/>`;
+  if(art === 'katze') s += `<path d="M${bx-rx+6},${by-6} q-50,-10 -40,-60 q6,-30 26,-26" stroke="${T.fell}" stroke-width="14" fill="none" stroke-linecap="round"/><path d="M${bx-rx-18},${by-80} q10,-12 20,-6" stroke="${T.dunkel}" stroke-width="14" fill="none" stroke-linecap="round"/>`;
+  if(g.huf){
+    (T.maehne.length > 1 ? T.maehne : [T.maehne[0], darker(T.maehne[0],1.3), T.maehne[0]]).forEach((c,i) => {
+      s += `<path d="M${bx-rx+10},${by-30} q${-34-i*4},${20+i*6} ${-22+i*8},${100-i*6}" stroke="${c}" stroke-width="10" fill="none" stroke-linecap="round"/>`;
+    });
+  }
+  // Beine hinten (fern)
+  if(art !== 'hase'){
+    [0,2].forEach(i => { s += `<rect x="${g.legsX[i]-g.legW/2}" y="${g.legTop}" width="${g.legW}" height="${g.legBottom-g.legTop}" rx="11" fill="${darker(T.fell,.85)}"/>`; });
+  }
+  // Hals Pony
+  if(g.huf){
+    s += `<path d="M${bx+40},${by-20} Q${bx+70},${by-80} ${g.head[0]-30},${g.head[1]-20} L${g.head[0]+20},${g.head[1]+10} Q${bx+110},${by+10} ${bx+90},${by+30} Z" fill="${T.fell}" stroke="${T.dunkel}" stroke-width="2.5"/>`;
+    T.maehne.forEach((c,i) => { s += `<path d="M${bx+36+i*3},${by-26} Q${bx+62},${by-86+i*4} ${g.head[0]-30+i*4},${g.head[1]-34}" stroke="${c}" stroke-width="${T.maehne.length>1?7:18}" fill="none" stroke-linecap="round" transform="translate(${-8+i*2},${-4})"/>`; });
+  }
+  // Körper
+  if(art === 'hase'){
+    s += `<ellipse cx="${bx-rx+4}" cy="${by-8}" rx="20" ry="20" fill="#fff"/>`;
+    s += `<ellipse cx="${bx}" cy="${by}" rx="${rx}" ry="${ry}" fill="${T.fell}" stroke="${T.dunkel}" stroke-width="2.5"/>`;
+    s += `<ellipse cx="${bx-45}" cy="${by+42}" rx="46" ry="36" fill="${darker(T.fell,.93)}"/>`;
+    s += `<ellipse cx="${bx+30}" cy="${by+30}" rx="46" ry="28" fill="${T.hell}"/>`;
+    [2,3].forEach(i => { s += `<rect x="${F[i][0]-12}" y="${by+20}" width="24" height="${F[i][1]-by-24}" rx="11" fill="${i===2?darker(T.fell,.85):T.fell}"/>`; });
+  } else {
+    s += `<ellipse cx="${bx}" cy="${by}" rx="${rx}" ry="${ry}" fill="${T.fell}" stroke="${T.dunkel}" stroke-width="2.5"/>`;
+    s += `<ellipse cx="${bx+10}" cy="${by+ry*.45}" rx="${rx*.62}" ry="${ry*.42}" fill="${T.hell}"/>`;
+    if(art === 'katze') s += `<path d="M${bx-40},${by-ry+4} q8,18 0,30 M${bx-10},${by-ry} q8,18 0,30 M${bx+20},${by-ry+2} q8,18 0,28" stroke="${T.dunkel}" stroke-width="7" fill="none" stroke-linecap="round"/>`;
+    if(art === 'hund') s += `<ellipse cx="${bx-30}" cy="${by-20}" rx="26" ry="18" fill="${T.dunkel}" opacity=".55"/>`;
+    [1,3].forEach(i => { s += `<rect x="${g.legsX[i]-g.legW/2}" y="${g.legTop}" width="${g.legW}" height="${g.legBottom-g.legTop}" rx="11" fill="${T.fell}" stroke="${T.dunkel}" stroke-width="2"/>`; });
+  }
+  // Füße + Krallen
+  F.forEach(([x,y],i) => {
+    s += `<g data-fuss="${i}">` + fussMalen(x, y, T, g.huf, lack[i], i===0||i===2) + '</g>';
+    if(!g.huf) s += krallen(x, y, langeKralle(i), lack[i]);
+  });
+  // Kopf
+  const stimmung = opt.stimmung || stimmungVon(p);
+  s += kopfMalen(art, T, g, stimmung);
+  // Pflaster (bleiben)
+  (p.pflaster||[]).forEach(([x,y]) => { s += pflasterSvg(x,y); });
+  // Ziele
+  if(!opt.mini) (p.ziele||[]).forEach((z,i) => { s += `<g id="zg${i}" opacity="${.3+.7*Math.max(0,z.hp)/z.max}">${zielSvg(z, T)}</g>`; });
+  // Schmuck
+  (p.deko||[]).forEach((d,i) => {
+    s += `<text data-deko="${i}" x="${d.x}" y="${d.y}" font-size="${d.gross||46}" text-anchor="middle" dominant-baseline="central">${d.e}</text>`;
+  });
+  return s;
+}
+const O = n => ASSET_DIR + 'o-' + n + '.webp';
+let UID = 0;
+function tierBild(p, opt){
+  const art = p.art, B = BILD_GEO[art], lack = p.lack || {};
+  const langeKralle = i => (p.ziele||[]).some(z => z.art === 'kralle' && z.fuss === i);
+  const stimmung = opt.stimmung || stimmungVon(p);
+  const datei = {froh:'froh', krank:'krank', traurig:'traurig', normal:'normal'}[stimmung] || 'normal';
+  let s = '';
+  if(!opt.mini) s += `<ellipse cx="200" cy="296" rx="175" ry="14" fill="#FFF8EE"/><ellipse cx="200" cy="291" rx="165" ry="9" fill="rgba(0,0,0,.10)"/>`;
+  else s += `<ellipse cx="200" cy="289" rx="150" ry="9" fill="rgba(0,0,0,.10)"/>`;
+  s += `<g${opt.mini ? '' : ' id="tierkoerper"'}><image href="${ASSET_DIR}${art}-${datei}.webp" x="0" y="-20" width="400" height="320"/>`;
+  const huf = art === 'pony' || art === 'einhorn', uid = 'u' + (++UID);
+  let defs = `<mask id="${uid}m" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="-20" width="400" height="320"><image href="${ASSET_DIR}${art}-${datei}.webp" x="0" y="-20" width="400" height="320"/></mask>`;
+  LACKE.forEach((c,i) => { defs += `<filter id="${uid}f${i}" color-interpolation-filters="sRGB"><feFlood flood-color="${c}"/><feComposite in2="SourceAlpha" operator="in"/><feBlend in2="SourceGraphic" mode="multiply"/></filter>`; });
+  s = `<defs>${defs}</defs>` + s;
+  B.feet.forEach(([x,y],i) => {
+    const li = lack[i] ? LACKE.indexOf(lack[i]) : -1;
+    if(huf){
+      if(li >= 0) s += `<g mask="url(#${uid}m)"><rect x="${x-24}" y="${y-12}" width="48" height="26" fill="${lack[i]}" opacity=".88"/><ellipse cx="${x-7}" cy="${y-2}" rx="6" ry="3" fill="#fff" opacity=".55"/></g>`;
+    } else if(langeKralle(i)){
+      s += `<image href="${O('krallen-lang')}" x="${x+4}" y="${y-8}" width="40" height="40"/>`;
+    } else if(li >= 0){
+      s += `<image href="${O('krallen-kurz')}" x="${x+6}" y="${y-5}" width="26" height="26" filter="url(#${uid}f${li})"/>`;
+    }
+  });
+  (p.pflaster||[]).forEach(([x,y]) => { s += `<image href="${O('pflaster')}" x="${x-26}" y="${y-26}" width="52" height="52" transform="rotate(-20 ${x} ${y})"/>`; });
+  s += '</g>';
+  if(!opt.mini) (p.ziele||[]).forEach((z,i) => { s += `<g id="zg${i}" opacity="${.3+.7*Math.max(0,z.hp)/z.max}">${zielBild(z)}</g>`; });
+  (p.deko||[]).forEach((d,i) => {
+    s += `<text data-deko="${i}" x="${d.x}" y="${d.y}" font-size="${d.gross||46}" text-anchor="middle" dominant-baseline="central">${d.e}</text>`;
+  });
+  return s;
+}
+function zielBild(z){
+  const {x, y} = z, im = (n, w, h, dx=0, dy=0, cls='') => `<image class="${cls}" href="${O(n)}" x="${x-w/2+dx}" y="${y-h/2+dy}" width="${w}" height="${h}"/>`;
+  switch(z.art){
+    case 'schlamm': return im('schlamm', 72, 72);
+    case 'schaum':  return im('schaum', 78, 78, 0, 0, 'wabbel');
+    case 'tropfen': return im('tropfen', 62, 62, 0, 0, 'glitzern');
+    case 'dorn':    return z.nagel ? im('nagel', 40, 52, 0, -26, 'pochen') : im('dorn', 40, 50, 0, -24, 'pochen');
+    case 'wunde':   return im('wunde', 40, 40, 0, -6);
+    case 'salbe':   return im('salbe', 42, 42, 0, -6, 'glitzern');
+    case 'knoten':  return im('knoten', 60, 60, 0, 0, 'wabbel');
+    case 'fieber2': return `<text x="${x+34}" y="${y-60}" font-size="34" text-anchor="middle">🌡️</text>`;
+  }
+  return '';
+}
+/* Beim Entfernen fliegt das Overlay-Bild als kleiner Effekt davon */
+function krallenFall(bild){
+  if(!BILDER) return;
+  const d = document.createElement('img'); d.src = O('krallen-lang'); d.className = 'weg-anim plopp';
+  const w = $('tier').getBoundingClientRect().width * 0.08;
+  Object.assign(d.style, {left:(bild.x-w/2)+'px', top:(bild.y-w/2)+'px', width:w+'px', height:w+'px'});
+  document.body.appendChild(d); setTimeout(() => d.remove(), 900);
+}
+function wegEffekt(z){
+  if(!BILDER) return;
+  const n = {schlamm:'schlamm', schaum:'schaum', tropfen:'tropfen', dorn: z.nagel ? 'nagel' : 'dorn', knoten:'knoten', salbe:'salbe'}[z.art];
+  if(!n) return;
+  const el = $('zg' + aktiv.ziele.indexOf(z)); if(!el) return;
+  const r = el.getBoundingClientRect(); if(!r.width) return;
+  const d = document.createElement('img'); d.src = O(n); d.className = 'weg-anim' + (z.art === 'dorn' ? ' plopp' : '');
+  Object.assign(d.style, {left:r.left+'px', top:r.top+'px', width:r.width+'px', height:r.height+'px'});
+  document.body.appendChild(d); setTimeout(() => d.remove(), 900);
+}
+/* Freudenhüpfer: Sprite-Streifen über dem Tier abspielen, solange das Standbild versteckt ist */
+function hopsen(){
+  if(!BILDER || !aktiv) return Promise.resolve();
+  return new Promise(res => {
+    const svg = $('tier'), h = $('hopser'), k = HOPS.k;
+    const a = svgZuBild(-112*k, -20-363*k), b = svgZuBild(-112*k + 1120*k, -20-363*k + 1120*k);
+    Object.assign(h.style, {left:a.x+'px', top:a.y+'px', width:(b.x-a.x)+'px', height:(b.y-a.y)+'px',
+      backgroundImage:`url(${ASSET_DIR}${aktiv.art}-hops.webp)`});
+    const v = $('hopvid');
+    const webm = v.canPlayType('video/webm; codecs="vp9"');
+    if(!webm){ res(); return; }
+    Object.assign(v.style, {left:h.style.left, top:h.style.top, width:h.style.width, height:h.style.height});
+    let fertig = false;
+    const ende = () => { if(fertig) return; fertig = true; v.style.display = 'none'; const k2 = svg.querySelector('#tierkoerper'); if(k2) k2.style.visibility = ''; res(); };
+    v.onended = ende; v.onerror = ende;
+    v.src = `${ASSET_DIR}${aktiv.art}-hops.webm`;
+    v.currentTime = 0;
+    v.play().then(() => {
+      v.style.display = 'block';
+      const koerper = svg.querySelector('#tierkoerper'); if(koerper) koerper.style.visibility = 'hidden';
+      setTimeout(ende, 4000);
+    }).catch(ende);
+  });
+}
+
+/* ================= Schichten: Schmutz und Zotteln über dem ganzen Tier =================
+   Jede Schicht ist ein eigenes Zahlenfeld (200×160 = viewBox/2, Werte 0..1). Reiben verändert
+   nur diese Zahlen; die Bildpunkte der Grafiken werden nie ausgelesen. Dadurch läuft das auch,
+   wenn das Spiel direkt als Datei geöffnet wird (dort verbietet Chrome das Auslesen von Bildern).
+   Schwamm: Schlamm weg, Schaum hin. Dusche: Schaum weg, Nässe hin. Föhn: Nässe weg. Bürste: Zotteln weg. */
+const Schicht = (() => {
+  const MW = 200, MH = 160, N = MW*MH, TEX = {}, R = 18;
+  const sx = x => x/2, sy = y => (y+20)/2;
+  function lade(n){ return TEX[n] || (TEX[n] = new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = ASSET_DIR + n + '.webp'; })); }
+  const MASKEN = {};
+  function silhouette(art){
+    if(MASKEN[art]) return MASKEN[art];
+    const m = new Uint8Array(N), code = (typeof BILD_MASKE !== 'undefined') && BILD_MASKE[art];
+    if(code){
+      let i = 0, pos = 0, v = 0;
+      while(i < code.length){
+        let n;
+        if(code.startsWith('zz', i)){ n = parseInt(code.substr(i+2, 3), 36); i += 5; }
+        else { n = parseInt(code.substr(i, 2), 36); i += 2; }
+        if(v) m.fill(1, pos, Math.min(N, pos+n));
+        pos += n; v ^= 1;
+      }
+    } else {                                   // Notlösung: Ellipse um den Körper
+      for(let y=0;y<MH;y++) for(let x=0;x<MW;x++) if(((x-95)/80)**2 + ((y-85)/62)**2 < 1) m[y*MW+x] = 1;
+    }
+    return MASKEN[art] = m;
+  }
+  const summe = f => { let s = 0; for(let i=0;i<N;i++) s += f[i]; return s; };
+  /* weicher runder Pinsel: add>0 malt dazu, add<0 nimmt weg; nur innerhalb der Silhouette */
+  function pinsel(f, sil, cx, cy, r, add){
+    const x0 = Math.max(0, Math.floor(cx-r)), x1 = Math.min(MW-1, Math.ceil(cx+r));
+    const y0 = Math.max(0, Math.floor(cy-r)), y1 = Math.min(MH-1, Math.ceil(cy+r));
+    for(let y=y0;y<=y1;y++) for(let x=x0;x<=x1;x++){
+      const d = Math.hypot(x-cx, y-cy); if(d > r) continue;
+      const i = y*MW+x; if(sil && !sil[i]) continue;
+      const w = 1 - d/r;
+      f[i] = Math.max(0, Math.min(1, f[i] + add*w));
+    }
+  }
+  function gesicht(p){ const m = BILD_GEO[p.art].mund; return [sx(m[0]), sy(m[1]-30), 33]; }
+  function anlegen(p){
+    const sil = silhouette(p.art), S = {sil, flaeche: summe(sil), m:{}, stand:{}};
+    const [fx, fy, fr] = gesicht(p);
+    const gesichtFrei = f => { for(let y=0;y<MH;y++) for(let x=0;x<MW;x++){ const d = Math.hypot(x-fx, y-fy); if(d < fr) f[y*MW+x] *= Math.min(1, Math.max(0, (d - fr*.55)/(fr*.45))); } };
+    if(p.ziele.some(z => z.art === 'schmutz')){
+      const f = new Float32Array(N);
+      for(let k=0;k<36;k++){
+        const u = Math.random();
+        pinsel(f, sil, 20 + Math.random()*150, 55 + Math.pow(u, .6)*100, 10 + Math.random()*16, 2);
+      }
+      BILD_GEO[p.art].feet.forEach(([a,b]) => pinsel(f, sil, sx(a), sy(b)-8, 16, 2));
+      gesichtFrei(f);
+      S.m.schlamm = f; S.m.schaum = new Float32Array(N); S.m.nass = new Float32Array(N);
+      S.start = summe(f) || 1;
+    }
+    if(p.ziele.some(z => z.art === 'zottel')){
+      const f = new Float32Array(N); for(let i=0;i<N;i++) f[i] = sil[i];
+      gesichtFrei(f); S.m.zottel = f; S.startZ = summe(f) || 1;
+    }
+    messen(S); p.schicht = S;
+    lade('t-schlamm'); lade('t-schaum'); lade('t-nass'); lade('t-zottel');
+  }
+  function messen(S){ for(const k in S.m) S.stand[k] = summe(S.m[k]); S.gemessen = performance.now(); }
+  const anteil = (S, k) => k === 'schlamm' ? S.stand.schlamm/S.start : k === 'zottel' ? S.stand.zottel/S.startZ : (S.stand[k]||0)/(S.flaeche||1);
+  function tool(p, art){
+    const S = p.schicht; if(art === 'zottel') return 'buerste';
+    if(!S) return 'schwamm';
+    if(anteil(S,'schlamm') > .12) return 'schwamm';
+    if(anteil(S,'schaum') > .06) return 'dusche';
+    return 'foehn';
+  }
+  function reiben(p, t, x, y, bew, dt){
+    const S = p.schicht; if(!S) return false;
+    const mx = sx(x), my = sy(y);
+    const xi = Math.round(mx), yi = Math.round(my);
+    if(xi < 0 || yi < 0 || xi >= MW || yi >= MH || !S.sil[yi*MW+xi]) return false;
+    const mehr = Math.min(1, bew/6 + dt*1.5), m = S.m;
+    let tat = false;
+    if(t === 'schwamm' && m.schlamm){
+      pinsel(m.schlamm, S.sil, mx, my, R, -.16*mehr); pinsel(m.schaum, S.sil, mx, my, R, .25*mehr); tat = true;
+    } else if(t === 'dusche' && m.schaum){
+      pinsel(m.schaum, S.sil, mx, my, R+3, -.15*mehr);
+      if(anteil(S,'schlamm') < .3) pinsel(m.schlamm, S.sil, mx, my, R, -.08*mehr);
+      pinsel(m.nass, S.sil, mx, my, R+3, .25*mehr); tat = true;
+    } else if(t === 'foehn' && m.nass){
+      pinsel(m.nass, S.sil, mx, my, R+4, -.15*mehr); tat = true;
+    } else if(t === 'buerste' && m.zottel){
+      if(bew > .5){ pinsel(m.zottel, S.sil, mx, my, R-2, -.12*Math.min(1, bew/6)); tat = true; }
+    }
+    if(!tat) return false;
+    malenBald(p);
+    if(performance.now() - S.gemessen > 250){ messen(S); pruefen(p); }
+    return true;
+  }
+  function pruefen(p){
+    const S = p.schicht;
+    const z = p.ziele.find(z => z.art === 'schmutz');
+    if(z){
+      const sauber = anteil(S,'schlamm') < .12, abgespuelt = anteil(S,'schaum') < .06;
+      if(sauber && !p.gesagt.schaum && !abgespuelt){ p.gesagt.schaum = 1; Voice.say('Super! Jetzt abduschen.'); }
+      if(sauber && abgespuelt && !p.gesagt.tropfen && anteil(S,'nass') > .06){ p.gesagt.tropfen = 1; Voice.say('Jetzt mit dem Föhn trocken föhnen.'); }
+      if(sauber && abgespuelt && anteil(S,'nass') < .06){ ['schlamm','schaum','nass'].forEach(k => S.m[k].fill(0)); fertig(p, z); return; }
+      markiere();
+    }
+    const zz = p.ziele.find(z => z.art === 'zottel');
+    if(zz && anteil(S,'zottel') < .12){ S.m.zottel.fill(0); fertig(p, zz); }
+  }
+  function fertig(p, z){
+    malen(p); SFX.ding(); herzen();
+    p.ziele.splice(p.ziele.indexOf(z), 1);
+    zeichne(); markiere();
+    if(p.ziele.length === 0 && p.phase === 'behandlung') gesund();
+  }
+  function lage(){ const a = svgZuBild(0, -20), b = svgZuBild(400, 300); return {x:a.x, y:a.y, w:b.x-a.x, h:b.y-a.y}; }
+  function zeigen(p){
+    const A = $('schichtA'), B = $('schichtB');
+    if(!p || !p.schicht || !$('raum').classList.contains('an')){ verstecken(); return; }
+    const L = lage(), dpr = Math.min(1.5, window.devicePixelRatio || 1);
+    for(const c of [A,B]){
+      Object.assign(c.style, {left:L.x+'px', top:L.y+'px', width:L.w+'px', height:L.h+'px', display:'block'});
+      const w = Math.max(1, Math.round(L.w*dpr*.7)), h = Math.max(1, Math.round(L.h*dpr*.7));
+      if(c.width !== w || c.height !== h){ c.width = w; c.height = h; }
+    }
+    malen(p);
+  }
+  /* Zahlenfeld -> kleine Maske (eigene Leinwand, nie mit Bildern vermischt) -> Textur ausstanzen */
+  const maskC = document.createElement('canvas'); maskC.width = MW; maskC.height = MH;
+  const maskX = maskC.getContext('2d'), maskD = maskX.createImageData(MW, MH);
+  let tmp = null;
+  function schichtMalen(ctx, f, tex, deck=1){
+    if(!f || !tex) return;
+    const d = maskD.data; for(let i=0;i<N;i++){ d[i*4+3] = Math.min(255, f[i]*255*deck); }
+    maskX.putImageData(maskD, 0, 0);
+    const w = ctx.canvas.width, h = ctx.canvas.height;
+    if(!tmp || tmp.width !== w || tmp.height !== h){ tmp = document.createElement('canvas'); tmp.width = w; tmp.height = h; }
+    const t = tmp.getContext('2d'); t.globalCompositeOperation = 'source-over'; t.clearRect(0,0,w,h);
+    t.drawImage(tex, 0, 0, w, h);
+    t.globalCompositeOperation = 'destination-in'; t.imageSmoothingEnabled = true; t.drawImage(maskC, 0, 0, w, h);
+    t.globalCompositeOperation = 'source-over';
+    ctx.drawImage(tmp, 0, 0);
+  }
+  let geplant = false;
+  function malenBald(p){ if(geplant) return; geplant = true; requestAnimationFrame(() => { geplant = false; malen(p); }); }
+  async function malen(p){
+    const S = p.schicht; if(!S) return;
+    const [tS, tF, tN, tZ] = await Promise.all(['t-schlamm','t-schaum','t-nass','t-zottel'].map(lade));
+    const a = $('schichtA').getContext('2d'), b = $('schichtB').getContext('2d');
+    a.clearRect(0,0,a.canvas.width,a.canvas.height);
+    b.fillStyle = '#fff'; b.fillRect(0,0,b.canvas.width,b.canvas.height);
+    if(S.m.nass) schichtMalen(a, S.m.nass, tN, .9);
+    if(S.m.schlamm){ schichtMalen(a, S.m.schlamm, tS); schichtMalen(a, S.m.schlamm, tS, .6); }
+    if(S.m.schaum) schichtMalen(a, S.m.schaum, tF);
+    if(S.m.zottel) schichtMalen(b, S.m.zottel, tZ);
+  }
+  function verstecken(){ $('schichtA').style.display = 'none'; $('schichtB').style.display = 'none'; }
+  return {anlegen, tool, reiben, zeigen, verstecken};
+})();
+
+function stimmungVon(p){
+  if(p.phase === 'schmuck' || p.phase === 'fertig' || p.phase === 'leckerli') return 'froh';
+  if((p.ziele||[]).some(z => z.art === 'fieber' || z.art === 'fieber2')) return 'krank';
+  if((p.ziele||[]).length) return 'traurig';
+  return 'froh';
+}
+function pflasterSvg(x, y){
+  return `<g transform="rotate(-25 ${x} ${y})"><rect x="${x-20}" y="${y-8}" width="40" height="16" rx="7" fill="#F5CFA0" stroke="#D9A86C" stroke-width="2"/>
+    <rect x="${x-7}" y="${y-6}" width="14" height="12" rx="2" fill="#FBE4C4"/><circle cx="${x-13}" cy="${y}" r="1.5" fill="#D9A86C"/><circle cx="${x+13}" cy="${y}" r="1.5" fill="#D9A86C"/></g>`;
+}
+function zielSvg(z, T){
+  const {x, y} = z;
+  switch(z.art){
+    case 'schlamm': return `<g fill="#6E4A2A"><circle cx="${x}" cy="${y}" r="24"/><circle cx="${x+18}" cy="${y-10}" r="15"/><circle cx="${x-18}" cy="${y+8}" r="14"/><circle cx="${x+10}" cy="${y+16}" r="11"/></g>
+      <circle cx="${x-6}" cy="${y-6}" r="5" fill="#8C6440"/><circle cx="${x+14}" cy="${y+10}" r="3" fill="#8C6440"/>`;
+    case 'schaum': return `<g fill="#fff" stroke="#CFE9F5" stroke-width="2"><circle cx="${x}" cy="${y}" r="20"/><circle cx="${x+20}" cy="${y-8}" r="14"/><circle cx="${x-20}" cy="${y+6}" r="14"/><circle cx="${x+6}" cy="${y-20}" r="11"/><circle cx="${x-8}" cy="${y+18}" r="10"/></g>`;
+    case 'tropfen': return [[0,-12],[-18,8],[16,10]].map(([dx,dy]) =>
+      `<path d="M${x+dx},${y+dy-14} q10,14 0,20 q-10,-6 0,-20z" fill="#5AB4F0" stroke="#2E86C8" stroke-width="1.5"/>`).join('');
+    case 'dorn': return z.nagel
+      ? `<rect x="${x-3}" y="${y-30}" width="6" height="26" fill="#9AA3AD" stroke="#5F6B75" stroke-width="1.5"/><rect x="${x-10}" y="${y-34}" width="20" height="7" rx="2" fill="#B8C0C8" stroke="#5F6B75" stroke-width="1.5"/>`
+      : `<path d="M${x-6},${y-2} L${x+2},${y-34} L${x+7},${y-2} Z" fill="#6B8E23" stroke="#3E5A10" stroke-width="2"/>`;
+    case 'wunde': return `<ellipse cx="${x}" cy="${y-4}" rx="11" ry="7" fill="#E84A5F"/><ellipse cx="${x}" cy="${y-4}" rx="5" ry="3" fill="#FF8A98"/>`;
+    case 'salbe': return `<ellipse cx="${x}" cy="${y-4}" rx="13" ry="9" fill="#fff" opacity=".9"/><ellipse cx="${x-3}" cy="${y-6}" rx="4" ry="2" fill="#E6F4FF"/>`;
+    case 'knoten': return `<path d="M${x-22},${y} c0,-20 20,-20 20,0 c0,20 -20,16 -12,-4 c8,-20 28,-12 24,6 c-4,18 -24,10 -14,-8 c8,-14 26,-4 18,10" stroke="${darker(T.fell,.62)}" stroke-width="5" fill="none" stroke-linecap="round"/>`;
+    case 'kralle': return ''; // Krallen sind im Fuß gezeichnet
+    case 'fieber': return '';
+    case 'fieber2': return `<text x="${x+34}" y="${y-60}" font-size="34" text-anchor="middle">🌡️</text>`;
+    case 'leckerli': return '';
+  }
+  return '';
+}
+
+/* ================= Probleme & Ablauf ================= */
+// Jede Stufe: welches Werkzeug, wie viel "Arbeit", was danach kommt
+const KETTE = {
+  schlamm: {tool:'schwamm', hp:260, rub:1, hold:0,   next:'schaum', r:34},
+  schaum:  {tool:'dusche',  hp:220, rub:1, hold:30,  next:'tropfen', r:36},
+  tropfen: {tool:'foehn',   hp:200, rub:1, hold:35,  next:null, r:34},
+  dorn:    {tool:'zange',   hp:110, rub:1, hold:10,  next:'wunde', r:26},
+  wunde:   {tool:'salbe',   hp:90,  rub:1, hold:15,  next:'salbe', r:24},
+  salbe:   {tool:'pflaster',hp:1,   rub:1, hold:999, next:null, r:26, bleibt:'pflaster'},
+  knoten:  {tool:'buerste', hp:260, rub:1, hold:0,   next:null, r:32},
+  kralle:  {tool:'schere',  hp:1,   rub:1, hold:999, next:null, r:24},
+  fieber:  {tool:'thermo',  hp:75,  rub:.5,hold:30,  next:'fieber2', r:34},
+  fieber2: {tool:'medizin', hp:1,   rub:1, hold:999, next:null, r:34},
+  leckerli:{tool:'leckerli',hp:1,   rub:1, hold:999, next:null, r:38}
+};
+const TOOLS = {
+  schwamm: {icon:'🧽', den:'den Schwamm'},
+  dusche:  {icon:'🚿', den:'die Dusche'},
+  foehn:   {svg:'foehn', den:'den Föhn'},
+  buerste: {svg:'buerste', den:'die Bürste'},
+  schere:  {icon:'✂️', den:'die Schere'},
+  zange:   {svg:'zange', den:'die Zange'},
+  salbe:   {icon:'🧴', den:'die Salbe'},
+  pflaster:{icon:'🩹', den:'das Pflaster'},
+  thermo:  {icon:'🌡️', den:'das Thermometer'},
+  medizin: {icon:'💊', den:'die Medizin'},
+};
+const TOOL_REIHE = ['schwamm','dusche','foehn','buerste','schere','zange','salbe','pflaster','thermo','medizin'];
+const SCHMUCK = ['🎀','👑','🌸','🎩','⭐','🕶️'];
+const LACKE = ['#FF6FA3','#A67CF2','#4FB8E8'];
+const TOOL_SVG = {
+  foehn: `<svg viewBox="0 0 64 64"><rect x="8" y="14" width="36" height="22" rx="11" fill="#FF8FB1" stroke="#C85A80" stroke-width="2"/><rect x="42" y="18" width="14" height="14" rx="3" fill="#8E9AA6"/><path d="M58,20 v10" stroke="#5F6B75" stroke-width="3" stroke-linecap="round"/><rect x="16" y="32" width="12" height="26" rx="5" fill="#FF8FB1" stroke="#C85A80" stroke-width="2"/><circle cx="20" cy="25" r="5" fill="#fff" opacity=".7"/></svg>`,
+  buerste: `<svg viewBox="0 0 64 64"><rect x="6" y="18" width="40" height="18" rx="8" fill="#A67CF2" stroke="#7650C2" stroke-width="2"/><rect x="44" y="23" width="18" height="8" rx="4" fill="#A67CF2" stroke="#7650C2" stroke-width="2"/><g stroke="#5A4A3A" stroke-width="3" stroke-linecap="round"><path d="M11,36 v12 M17,36 v12 M23,36 v12 M29,36 v12 M35,36 v12 M41,36 v12"/></g></svg>`,
+  zange: `<svg viewBox="0 0 64 64"><path d="M10,8 L34,52 L38,50 Z" fill="#B8C0C8" stroke="#5F6B75" stroke-width="2" stroke-linejoin="round"/><path d="M26,8 L34,52 L38,50 Z" fill="#D5DBE0" stroke="#5F6B75" stroke-width="2" stroke-linejoin="round"/><circle cx="36" cy="51" r="4" fill="#5F6B75"/><rect x="4" y="4" width="12" height="10" rx="3" fill="#4FB8E8"/><rect x="20" y="4" width="12" height="10" rx="3" fill="#4FB8E8"/></svg>`,
+  lack: c => `<svg viewBox="0 0 64 64"><rect x="24" y="4" width="16" height="20" rx="3" fill="#2F3A45"/><path d="M16,26 h32 l4,30 q0,6 -6,6 h-28 q-6,0 -6,-6 z" fill="${c}" stroke="${darker(c,.7)}" stroke-width="2"/><rect x="20" y="30" width="6" height="22" rx="3" fill="#fff" opacity=".5"/></svg>`
+};
+function iconHtml(t){
+  if(t.startsWith('lack')) return TOOL_SVG.lack(LACKE[+t.slice(4)]);
+  if(t === 'leckerli') return TIERE[aktiv.art].leckerli;
+  if(t.startsWith('deko')) return SCHMUCK[+t.slice(4)];
+  const d = TOOLS[t];
+  return d.svg ? TOOL_SVG[d.svg] : d.icon;
+}
+
+const PROBLEME = {
+  schlamm: {blase:'🛁'},
+  dorn:    {blase:'🩹'},
+  knoten:  {blase:'🪮'},
+  kralle:  {blase:'✂️'},
+  fieber:  {blase:'🤒'}
+};
+function problemeFuer(art){
+  const huf = art === 'pony' || art === 'einhorn';
+  return Object.keys(PROBLEME).filter(k => !(huf && k === 'kralle'));
+}
+function stufe(){ return Math.min(3, Math.floor(S.behandelt / 3)); }
+
+function neuerPatient(art){
+  const st = stufe();
+  const anzahl = st === 0 ? 1 : st === 1 ? (Math.random() < .5 ? 1 : 2) : st === 2 ? 2 : (Math.random() < .3 ? 3 : 2);
+  const probs = mischen(problemeFuer(art)).slice(0, anzahl);
+  const p = {art, probleme:probs, ziele:[], pflaster:[], deko:[], lack:{}, phase:'behandlung', gesagt:{}};
+  const g = geo(art), P = punkte(art), F = P.feet;
+  const add = (a, x, y, extra={}) => { const k = KETTE[a]; p.ziele.push({art:a, x, y, hp:k.hp, max:k.hp, r:k.r, ...extra}); };
+  for(const pr of probs){
+    if(pr === 'schlamm' && BILDER){
+      p.ziele.push({art:'schmutz', x:0, y:0, hp:1, max:1, r:0});
+    } else if(pr === 'knoten' && BILDER){
+      p.ziele.push({art:'zottel', x:0, y:0, hp:1, max:1, r:0});
+    } else if(pr === 'schlamm'){
+      P.body.forEach(([x,y]) => add('schlamm', x, y));
+    } else if(pr === 'dorn'){
+      const [x,y] = F[3]; add('dorn', x, y-4, {fuss:3, nagel:g.huf});
+    } else if(pr === 'knoten'){
+      P.body.slice(0,3).forEach(([x,y],i) => add('knoten', x + (i===1?6:-6), y - 14));
+    } else if(pr === 'kralle'){
+      F.forEach(([x,y],i) => add('kralle', x+(BILDER?20:22), y-(BILDER?4:0), {fuss:i}));
+    } else if(pr === 'fieber'){
+      add('fieber', P.mund[0], P.mund[1]);
+    }
+  }
+  // Schlamm und Knoten dürfen nicht übereinanderliegen
+  if(probs.includes('schlamm') && probs.includes('knoten')){
+    p.ziele.filter(z => z.art === 'knoten').forEach((z,i) => { z.y -= 34; z.x += 22; });
+  }
+  return p;
+}
+
+function ansage(p){
+  const T = TIERE[p.art], teile = [];
+  for(const pr of p.probleme){
+    if(pr === 'schlamm') teile.push(`${T.Der} hat sich im Schlamm gewälzt! Zuerst mit dem Schwamm einseifen.`);
+    if(pr === 'dorn') teile.push(p.ziele.find(z=>z.nagel) || (p.art==='pony'||p.art==='einhorn')
+      ? `Oh je, ${T.Der.toLowerCase()} hat einen Nagel im Huf. Zieh ihn mit der Zange raus.`
+      : `Aua! ${T.Der} hat einen Dorn in der Pfote. Zieh ihn mit der Zange raus.`);
+    if(pr === 'knoten') teile.push(`Das Fell ist ganz verknotet. Bürste es schön glatt!`);
+    if(pr === 'kralle') teile.push(`Die Krallen sind viel zu lang. Schneide sie mit der Schere.`);
+    if(pr === 'fieber') teile.push(`${T.Der} ist krank. Miss zuerst Fieber mit dem Thermometer. Halt es an den Mund.`);
+  }
+  return teile.map(t => ({text:t, pause:350}));
+}
+const STUFEN_SATZ = {
+  schaum: 'Super! Jetzt abduschen.',
+  tropfen: 'Jetzt mit dem Föhn trocken föhnen.',
+  wunde: 'Geschafft, er ist raus! Jetzt kommt Salbe drauf.',
+  salbe: 'Und jetzt ein Pflaster.',
+  fieber2: 'Ganz schön warm. Jetzt gibt es Medizin.'
+};
+
+/* ================= Wartezimmer ================= */
+function neueRunde(){
+  const neu = FREISCHALTEN.find(f => S.behandelt >= f.ab && !S.bekannt.includes(f.art));
+  let arten = S.bekannt.slice();
+  const liste = [];
+  if(neu){ S.bekannt.push(neu.art); save(); liste.push(neu.art); arten = S.bekannt.slice(); }
+  while(liste.length < 3){
+    const a = rnd(arten);
+    if(liste.filter(x => x === a).length < (arten.length < 3 ? 2 : 1)) liste.push(a);
+  }
+  patienten = mischen(liste).map(neuerPatient);
+  rundeFertig = 0;
+  zeigeWarte();
+  if(neu) Voice.say([{text:`Neu in der Tierpraxis: ${TIERE[neu.art].Der.replace(/^Der|^Die|^Das/, m => ({Der:'ein',Die:'eine',Das:'ein'})[m])}!`, pause:300}]);
+  Voice.say('Wer ist als Nächstes dran? Tipp ein Tier an.');
+}
+function zeigeWarte(){
+  szene('warte'); aktiv = null; $('home').classList.add('aus');
+  const bank = $('bank'); bank.innerHTML = '';
+  patienten.forEach((p, i) => {
+    if(p.phase === 'fertig') return;
+    const d = document.createElement('div'); d.className = 'patient dran'; d.dataset.i = i;
+    d.style.animationDelay = (i*.3) + 's';
+    const blase = p.phase === 'behandlung' ? PROBLEME[p.probleme[0]].blase + (p.probleme.length > 1 ? '' : '') : '🎀';
+    d.innerHTML = `<div class="blase">${blase}</div><svg viewBox="0 -20 400 320">${tierMalen(p, {mini:true})}</svg><div class="kissen"></div>`;
+    d.addEventListener('click', () => { ac(); SFX.pop(); behandeln(p); });
+    bank.appendChild(d);
+  });
+  fotowand();
+  idleReset();
+}
+function fotowand(neu){
+  const w = $('fotowand'); w.innerHTML = '';
+  S.fotos.slice(-8).forEach((f, i, arr) => {
+    const d = document.createElement('div'); d.className = 'foto' + (neu && i === arr.length-1 ? ' neu' : '');
+    d.style.setProperty('--r', ((i*37)%11 - 5) + 'deg');
+    d.innerHTML = `<svg viewBox="30 -30 360 330">${tierMalen({...f, ziele:[], phase:'fertig'}, {mini:true, stimmung:'froh'})}</svg>`;
+    w.appendChild(d);
+  });
+}
+
+/* ================= Behandlung ================= */
+function szene(id){ document.querySelectorAll('.szene').forEach(s => s.classList.toggle('an', s.id === id)); if(id !== 'raum') Schicht.verstecken(); }
+
+function schichtErsatz(p){
+  const P = punkte(p.art);
+  p.ziele = p.ziele.flatMap(z => z.art === 'schmutz' ? P.body.map(([x,y]) => ({art:'schlamm', x, y, hp:KETTE.schlamm.hp, max:KETTE.schlamm.hp, r:KETTE.schlamm.r}))
+                            : z.art === 'zottel' ? P.body.slice(0,3).map(([x,y]) => ({art:'knoten', x, y:y-14, hp:KETTE.knoten.hp, max:KETTE.knoten.hp, r:KETTE.knoten.r}))
+                            : [z]);
+}
+async function behandeln(p){
+  aktiv = p; szene('raum'); $('home').classList.remove('aus');
+  if(BILDER && !p.schicht && p.ziele.some(z => z.art === 'schmutz' || z.art === 'zottel')){
+    try{ Schicht.anlegen(p); }catch(e){ console.warn('Schicht', e); schichtErsatz(p); }
+  }
+  zeichne(); ablage();
+  if(p.phase === 'behandlung') Voice.replace(ansage(p));
+  else if(p.phase === 'leckerli') Voice.replace(`Zur Belohnung gibt es ein Leckerli! Zieh es zum Mund.`);
+  else Voice.replace('Jetzt darfst du schmücken. Wenn du fertig bist, drück den grünen Haken.');
+  idleReset();
+}
+function zeichne(){ $('tier').innerHTML = tierMalen(aktiv); Schicht.zeigen(aktiv); }
+
+function naechstesTool(){
+  const z = aktiv.ziele[0]; if(!z) return null;
+  if(z.art === 'schmutz' || z.art === 'zottel') return Schicht.tool(aktiv, z.art);
+  return KETTE[z.art].tool;
+}
+function ablage(){
+  const a = $('ablage'); a.innerHTML = '';
+  let tools;
+  if(aktiv.phase === 'behandlung'){
+    const noetig = new Set();
+    for(const pr of aktiv.probleme){
+      let k = pr === 'dorn' ? 'dorn' : pr;
+      while(k){ noetig.add(KETTE[k].tool); k = KETTE[k].next; }
+    }
+    // (Schichten nutzen dieselben Werkzeuge wie die Ketten schlamm/knoten)
+    const st = stufe();
+    const extra = st >= 2 ? TOOL_REIHE.length : st === 1 ? 3 : 2;
+    const rest = mischen(TOOL_REIHE.filter(t => !noetig.has(t))).slice(0, extra);
+    const set = new Set([...noetig, ...rest]);
+    tools = TOOL_REIHE.filter(t => set.has(t));
+  } else if(aktiv.phase === 'leckerli'){
+    tools = ['leckerli'];
+  } else {
+    tools = [...SCHMUCK.map((_,i) => 'deko'+i), ...LACKE.map((_,i) => 'lack'+i), 'fertig'];
+  }
+  for(const t of tools){
+    const b = document.createElement('button'); b.className = 'werkzeug'; b.dataset.t = t;
+    if(t === 'fertig'){ b.classList.add('fertig'); b.textContent = '✔'; b.setAttribute('aria-label','Fertig'); }
+    else b.innerHTML = iconHtml(t);
+    a.appendChild(b);
+  }
+  markiere();
+}
+function markiere(){
+  const t = aktiv.phase === 'behandlung' ? naechstesTool() : aktiv.phase === 'leckerli' ? 'leckerli' : (aktiv.deko.length ? 'fertig' : null);
+  document.querySelectorAll('.werkzeug').forEach(b => b.classList.toggle('dran', b.dataset.t === t));
+}
+
+/* ---- Ziehen ---- */
+let drag = null;
+const GHOST_DY = -64;
+function svgPunkt(cx, cy){
+  const svg = $('tier'), pt = svg.createSVGPoint(); pt.x = cx; pt.y = cy;
+  return pt.matrixTransform(svg.getScreenCTM().inverse());
+}
+function svgZuBild(x, y){
+  const svg = $('tier'), pt = svg.createSVGPoint(); pt.x = x; pt.y = y;
+  return pt.matrixTransform(svg.getScreenCTM());
+}
+$('ablage').addEventListener('pointerdown', e => {
+  const b = e.target.closest('.werkzeug'); if(!b || !aktiv) return;
+  ac(); e.preventDefault(); idleReset();
+  const t = b.dataset.t;
+  if(t === 'fertig'){ fertig(); return; }
+  SFX.klick();
+  drag = {t, x:e.clientX, y:e.clientY, lx:null, ly:null, last:performance.now(), weg:0, falsch:0, btn:b};
+  b.classList.add('weg');
+  const g = $('ghost'); g.innerHTML = iconHtml(t); g.style.display = 'flex';
+  setGhost(e.clientX, e.clientY);
+  $('ablage').setPointerCapture(e.pointerId);
+  requestAnimationFrame(schleife);
+});
+function setGhost(x, y){ const g = $('ghost'); g.style.left = x + 'px'; g.style.top = (y + GHOST_DY) + 'px'; }
+$('ablage').addEventListener('pointermove', e => {
+  if(!drag) return; drag.x = e.clientX; drag.y = e.clientY; setGhost(e.clientX, e.clientY); idleReset();
+});
+function dragEnde(e){
+  if(!drag) return; const d = drag; drag = null;
+  d.btn.classList.remove('weg'); $('ghost').style.display = 'none';
+  if(d.t.startsWith('deko') && aktiv){
+    const p = svgPunkt(d.x, d.y + GHOST_DY);
+    if(p.x > 20 && p.x < 400 && p.y > -30 && p.y < 300){
+      aktiv.deko.push({e:SCHMUCK[+d.t.slice(4)], x:Math.round(p.x), y:Math.round(p.y)});
+      SFX.pop(); glitzer(d.x, d.y + GHOST_DY); zeichne(); markiere();
+      if(aktiv.deko.length === 1) Voice.say('Hübsch!');
+    }
+  }
+}
+$('ablage').addEventListener('pointerup', dragEnde);
+$('ablage').addEventListener('pointercancel', dragEnde);
+
+let tonT = 0, tippT = -1e9;
+function schleife(now){
+  if(!drag || !aktiv) return;
+  const dt = Math.min(.1, (now - drag.last)/1000); drag.last = now;
+  const p = svgPunkt(drag.x, drag.y + GHOST_DY);
+  const bew = drag.lx === null ? 0 : Math.hypot(p.x - drag.lx, p.y - drag.ly);
+  drag.lx = p.x; drag.ly = p.y;
+  const aufTier = p.x > 40 && p.x < 400 && p.y > -10 && p.y < 295;
+  let getroffen = false;
+
+  if(drag.t.startsWith('lack')){
+    const F = punkte(aktiv.art).feet;
+    F.forEach(([x,y],i) => {
+      if(Math.hypot(p.x-x-(BILDER?14:8), p.y-y) < 34 && aktiv.lack[i] !== LACKE[+drag.t.slice(4)]){
+        aktiv.lack[i] = LACKE[+drag.t.slice(4)]; SFX.quietsch(); glitzer(drag.x, drag.y+GHOST_DY); zeichne();
+      }
+    });
+  } else if(aktiv.phase !== 'schmuck'){
+    if(aktiv.schicht && Schicht.reiben(aktiv, drag.t, p.x, p.y, bew, dt)){
+      getroffen = true; effekt(drag.t, drag.x, drag.y + GHOST_DY, now);
+    }
+    for(let i = 0; i < aktiv.ziele.length; i++){
+      const z = aktiv.ziele[i], k = KETTE[z.art];
+      if(!k) continue;
+      if(Math.hypot(p.x - z.x, p.y - z.y) > z.r + 22) continue;
+      if(k.tool !== drag.t) continue;
+      getroffen = true;
+      z.hp -= bew * k.rub + k.hold * dt;
+      effekt(drag.t, drag.x, drag.y + GHOST_DY, now);
+      if(z.hp <= 0){ zielFertig(i); break; }
+      const el = $('zg'+i); if(el) el.setAttribute('opacity', .3 + .7*Math.max(0,z.hp)/z.max);
+    }
+    if(!getroffen && aufTier && bew > 0 && aktiv.phase === 'behandlung'){
+      drag.falsch += bew;
+      if(drag.falsch > 260 && now - tippT > 7000){
+        const n = naechstesTool();
+        if(n && n !== drag.t){ tippT = now; SFX.nope(); Voice.say(`Hmm, probier mal ${TOOLS[n].den}.`); wackeln(n); }
+        drag.falsch = 0;
+      }
+    }
+  }
+  requestAnimationFrame(schleife);
+}
+function effekt(t, x, y, now){
+  if(now - tonT < 220) return; tonT = now;
+  if(t === 'schwamm'){ SFX.quietsch(); for(let i=0;i<3;i++) teilchen('blubb', x, y); }
+  else if(t === 'dusche'){ SFX.wasser(); for(let i=0;i<5;i++) teilchen('tropf', x-20+Math.random()*40, y+20); }
+  else if(t === 'foehn'){ SFX.wind(); for(let i=0;i<3;i++) teilchen('luft', x+20, y-10+Math.random()*20); }
+  else if(t === 'buerste'){ SFX.quietsch(); teilchen('glitzer', x, y, '✨'); }
+  else if(t === 'thermo'){ tone(1200 + Math.random()*200, .05, 'sine', .06); }
+  else if(t === 'salbe'){ SFX.quietsch(); }
+  else if(t === 'zange'){ tone(400, .05, 'triangle', .06); }
+}
+function teilchen(cls, x, y, txt){
+  const s = document.createElement('div'); s.className = 'teilchen ' + cls;
+  s.style.left = x + 'px'; s.style.top = y + 'px';
+  s.style.setProperty('--dx', (Math.random()*80-40) + 'px'); s.style.setProperty('--dy', (-30 - Math.random()*50) + 'px');
+  if(cls === 'luft') s.style.setProperty('--dx', '-90px');
+  if(txt) s.textContent = txt;
+  document.body.appendChild(s); setTimeout(() => s.remove(), 1500);
+}
+function glitzer(x, y){ for(let i=0;i<5;i++) teilchen('glitzer', x, y, '✨'); }
+function herzen(){
+  const r = $('tier').getBoundingClientRect();
+  for(let i=0;i<6;i++) setTimeout(() => teilchen('herz', r.left + r.width*(.35+Math.random()*.4), r.top + r.height*.35, '❤️'), i*140);
+}
+
+function zielFertig(i){
+  const z = aktiv.ziele[i], k = KETTE[z.art];
+  const bild = svgZuBild(z.x, z.y);
+  if(z.art === 'dorn'){ SFX.plopp(); } else if(z.art === 'kralle'){ SFX.schnipp(); krallenFall(bild); } else SFX.ding();
+  glitzer(bild.x, bild.y);
+  wegEffekt(z);
+  if(k.bleibt === 'pflaster') aktiv.pflaster.push([z.x, z.y - 4]);
+  if(k.next){
+    const n = KETTE[k.next];
+    aktiv.ziele[i] = {...z, art:k.next, hp:n.hp, max:n.hp, r:n.r};
+    if(!aktiv.gesagt[k.next]){ aktiv.gesagt[k.next] = 1; let s = STUFEN_SATZ[k.next];
+      if(k.next === 'wunde' && z.nagel) s = s.replace('er ist raus', 'der Nagel ist raus');
+      if(k.next === 'wunde' && !z.nagel) s = s.replace('er ist raus', 'der Dorn ist raus');
+      Voice.say(s); }
+  } else {
+    aktiv.ziele.splice(i, 1);
+  }
+  if(z.art === 'leckerli'){ leckerliGegessen(); return; }
+  zeichne(); markiere();
+  if(aktiv.ziele.length === 0 && aktiv.phase === 'behandlung') gesund();
+}
+function gesund(){
+  const T = TIERE[aktiv.art];
+  aktiv.phase = 'leckerli';
+  SFX.jubel(); herzen();
+  $('tier').classList.remove('freude'); void $('tier').offsetWidth; $('tier').classList.add('freude');
+  const schoen = aktiv.probleme.every(p => p === 'knoten' || p === 'kralle' || p === 'schlamm');
+  Voice.say([{text: schoen ? `Wunderschön! ${T.Der} ist ganz glücklich.` : `Geschafft! ${T.Der} ist wieder gesund.`, pause:250},
+             'Zur Belohnung gibt es ein Leckerli. Zieh es zum Mund.']);
+  const P = punkte(aktiv.art);
+  aktiv.ziele = [{art:'leckerli', x:P.mund[0], y:P.mund[1], hp:1, max:1, r:KETTE.leckerli.r}];
+  zeichne(); ablage();
+  hopsen();
+}
+function leckerliGegessen(){
+  SFX.mampf(); aktiv.phase = 'schmuck'; zeichne();
+  $('tier').classList.add('mampf'); setTimeout(() => $('tier').classList.remove('mampf'), 1600);
+  herzen();
+  Voice.say(['Mmmh, lecker!', {text:'Jetzt darfst du schmücken und die Krallen lackieren. Wenn du fertig bist, drück den grünen Haken.', pause:0}]);
+  if(aktiv.art === 'pony' || aktiv.art === 'einhorn') { /* Hufe lackieren geht auch */ }
+  ablage();
+}
+function fertig(){
+  if(!aktiv) return;
+  const p = aktiv, T = TIERE[p.art];
+  p.phase = 'fertig';
+  S.sterne++; S.behandelt++;
+  S.fotos.push({art:p.art, deko:p.deko, lack:p.lack, pflaster:p.pflaster});
+  if(S.fotos.length > 30) S.fotos = S.fotos.slice(-30);
+  save(); $('sterne').textContent = S.sterne;
+  SFX.fanfare(); herzen();
+  $('tier').classList.remove('freude'); void $('tier').offsetWidth; $('tier').classList.add('freude');
+  Voice.replace([`Tschüss, ${T.name}! Danke für deine Hilfe.`]);
+  rundeFertig++;
+  setTimeout(() => {
+    zeigeWarte(); fotowand(true);
+    if(patienten.every(q => q.phase === 'fertig')){
+      konfetti(); SFX.jubel();
+      Voice.say([{text:'Alle Tiere sind wieder gesund! Toll gemacht!', pause:600}]);
+      setTimeout(neueRunde, 3800);
+    } else Voice.say('Wer ist als Nächstes dran?');
+  }, 1800);
+}
+function konfetti(){
+  const k = $('konfetti'); const farben = ['#FF8FB1','#FFD84D','#4FB8E8','#8FD6A0','#A67CF2'];
+  for(let i=0;i<60;i++){
+    const c = document.createElement('div'); c.className = 'konf';
+    c.style.left = Math.random()*100 + 'vw'; c.style.background = rnd(farben);
+    c.style.animationDelay = Math.random()*.8 + 's'; k.appendChild(c); setTimeout(() => c.remove(), 3500);
+  }
+}
+
+/* Schmuck antippen = wieder abnehmen */
+$('tier').addEventListener('pointerdown', e => {
+  const t = e.target.closest('[data-deko]'); if(!t || !aktiv || aktiv.phase !== 'schmuck') return;
+  aktiv.deko.splice(+t.dataset.deko, 1); SFX.pop(); zeichne(); markiere(); idleReset();
+});
+
+/* ---- Tipps nach Wartezeit ---- */
+let idleT = null;
+function idleReset(){
+  clearTimeout(idleT);
+  idleT = setTimeout(tipp, 13000);
+}
+function wackeln(t){
+  const b = document.querySelector(`.werkzeug[data-t="${t}"]`); if(!b) return;
+  b.classList.remove('wackel'); void b.offsetWidth; b.classList.add('wackel');
+}
+const TIPP = {zange:'zieh damit', schere:'tipp damit die Krallen an', pflaster:'kleb es drauf', thermo:'halt es an den Mund', medizin:'gib sie in den Mund'};
+function tipp(){
+  if(drag) return idleReset();
+  if(!aktiv){ Voice.say('Tipp ein Tier an!'); }
+  else if(aktiv.phase === 'behandlung'){
+    const n = naechstesTool();
+    if(n){ wackeln(n); Voice.say(`Nimm ${TOOLS[n].den} und ${TIPP[n] || 'reib damit über das Tier'}.`); }
+  }
+  else if(aktiv.phase === 'leckerli'){ wackeln('leckerli'); Voice.say('Zieh das Leckerli zum Mund.'); }
+  else { wackeln('fertig'); }
+  idleReset();
+}
+
+/* ================= Rahmen ================= */
+$('home').addEventListener('click', () => { ac(); SFX.klick(); Voice.flush(); zeigeWarte(); });
+let resetT;
+$('sterneChip').addEventListener('pointerdown', () => { resetT = setTimeout(() => {
+  if(confirm('Spielstand wirklich zurücksetzen?')){ localStorage.removeItem(SAVE_KEY); location.reload(); }
+}, 3000); });
+['pointerup','pointerleave','pointercancel'].forEach(ev => $('sterneChip').addEventListener(ev, () => clearTimeout(resetT)));
+$('fs').addEventListener('click', () => {
+  if(!document.fullscreenElement) document.documentElement.requestFullscreen?.().catch(()=>{});
+  else document.exitFullscreen?.();
+});
+$('go').addEventListener('click', async () => {
+  ac(); document.documentElement.requestFullscreen?.().catch(()=>{});
+  await Promise.race([bilderBereit, new Promise(r => setTimeout(r, 1500))]);
+  $('start').remove();
+  Voice.say([{text:'Willkommen in der Tierpraxis!', pause:300}]);
+  neueRunde();
+});
+document.addEventListener('contextmenu', e => e.preventDefault());
+window.addEventListener('resize', () => { if(aktiv && $('raum').classList.contains('an')) Schicht.zeigen(aktiv); });
+load(); $('sterne').textContent = S.sterne;
+if('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body>
+</html>
